@@ -67,7 +67,7 @@ crashlytics-build.properties
 # Packed Addressables
 /[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
 
-/Assets/CodeMonkey
 /Assets/Scripts/Heatmaps/
+
 *.exr
 *.hdr
