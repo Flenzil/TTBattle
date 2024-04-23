@@ -35,6 +35,22 @@ public class Actions : GeneralActions
         return WrapNaturalWeapons(naturalWeapons);
     }
 
+    public List<Attack> GetAttacks(){
+        List<Attack> attacks = new();
+        List<WeaponAttack> weaponAttacks = GetWeaponAttacks();
+        List<NaturalWeaponAttack> naturalWeaponAttacks = GetNaturalWeaponAttacks();
+
+        for (int i = 0; i < weaponAttacks.Count; i++){
+            attacks.Add(weaponAttacks[i]);
+        }
+
+        for (int i = 0; i < naturalWeaponAttacks.Count; i++){
+            attacks.Add(naturalWeaponAttacks[i]);
+        }
+
+        return attacks;
+    }
+
     public void SetActiveAttack(Attack attack){
         activeAttack = attack;
     }

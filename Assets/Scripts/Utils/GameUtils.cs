@@ -29,6 +29,10 @@ namespace GameUtils {
             return GetActiveCreature().GetComponent<CreatureStats>();
         }
 
+        public static Actions GetActiveCreatureActions(){
+            return GetActiveCreature().GetComponent<Actions>();
+        }
+
         public static CreatureStats GetCreatureStats(GameObject creature){
             return creature.GetComponent<CreatureStats>();
         }
