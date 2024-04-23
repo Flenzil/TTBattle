@@ -1,4 +1,4 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/WeponButtonStyle.uss?fileID=7433441132597879392&amp;guid=12f7c6da5c15527488f76988274ef2f4&amp;type=3#WeponButtonStyle" />
-    <ui:Button class="button" style="width: 200px; height: 100px; max-width: 200px; max-height: 200px; min-width: 100px; min-height: 100px;" />
+    <ui:Button class="button" />
 </ui:UXML>

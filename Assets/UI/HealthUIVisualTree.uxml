@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/HPStyle.uss?fileID=7433441132597879392&amp;guid=fc6a5e43987bcf94d9c05ca5e359c738&amp;type=3#HPStyle" />
+    <ui:VisualElement name="HealthContainer" style="flex-grow: 1; width: 200px; height: 200px; max-width: 200px; max-height: 200px; min-width: 100px; min-height: 100px; right: auto; left: 1720px; bottom: auto; top: 880px; background-color: rgb(255, 0, 0);">
+        <ui:Label text="&#10;" name="Health" class="text" style="white-space: normal;" />
+    </ui:VisualElement>
+</ui:UXML>
