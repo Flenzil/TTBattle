@@ -1,9 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using PathingUtils;
 using Unity.VisualScripting;
 using System.Linq;
 using GameUtils;
+using System.Collections;
+using UnityEngine.Analytics;
 
 public class PathFindingManager : MonoBehaviour {
 
@@ -23,6 +26,11 @@ public class PathFindingManager : MonoBehaviour {
 
     private void Update() {
 
+        if (EventSystem.current.IsPointerOverGameObject()){
+            pathFindingVisual.UnHighlightPath(pathFindingVisual.highlightedPath);
+            return;
+        }
+
         HighLightPath();
         HandleMovement();
 
@@ -31,6 +39,8 @@ public class PathFindingManager : MonoBehaviour {
             // Find object under mouse position
             Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit);
             GameObject hitObject = hit.transform.GameObject();
+
+
 
             // If the object is the active player, pathfind to ground behind it, as if the object wasn't there.
             if (hitObject.layer == LayerMask.NameToLayer("Creatures") && IsActiveCreature(hitObject)){
@@ -145,49 +155,6 @@ public class PathFindingManager : MonoBehaviour {
     private void StopMoving() {
         pathVectorList = null;
     }
-
-    /*
-    private void EnsurePathEndIsNotInsideCreature(){
-        if (
-            path != null
-            && path.Count > 1
-            && IsAnyPartOfCreatureSpaceOccupied(UGame.GetActiveCreature(), path.Last().x, path.Last().y) 
-            && path.Last().GetOccupyingCreature() != UGame.GetActiveCreature()
-            ){
-                CutOccupiedSpacesFromPath();
-            }
-    }
-
-    private void CutOccupiedSpacesFromPath(){
-        //path.Remove(path.Last());
-        while (true){
-            if (IsAnyPartOfCreatureSpaceOccupied(UGame.GetActiveCreature(), path.Last().x, path.Last().y)){
-                path.Remove(path.Last());
-                if (path.Count == 0){
-                    path = null;
-                    return;
-                }
-            } else {
-                return;
-            }
-        }
-    }
-    
-    private bool IsAnyPartOfCreatureSpaceOccupied(GameObject creature, int x, int y){
-        UPathing.GetSeekRadius(creature.GetComponent<CreatureStats>().GetSize(), out int seekRadiusStart, out int seekRadiusEnd);
-        for (int i = seekRadiusStart; i <= seekRadiusEnd; i++){
-            for (int j = seekRadiusStart; j <= seekRadiusEnd; j++){
-                if (
-                    GetGrid().GetGridObject(x + i, y + j).isOccupied 
-                    && GetGrid().GetGridObject(x + i, y + j).GetOccupyingCreature() != creature
-                ){
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    */
 
     private void SetSpaceToOccupied(PathNode positionNode, GameObject creature){
         Grid<PathNode> grid = Pathfinding.Instance.GetGrid();

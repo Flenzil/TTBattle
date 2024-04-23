@@ -6,6 +6,7 @@ using Unity.VisualScripting;
 using System.Linq;
 using System;
 using GameUtils;
+using UnityEngine.EventSystems;
 
 public class PathFindingVisual : MonoBehaviour {
 
@@ -17,7 +18,7 @@ public class PathFindingVisual : MonoBehaviour {
     private GameObject[] floor;
     private int floorTileToUpdateX;
     private int floorTileToUpdateY;
-    private List<PathNode> highlightedPath = new List<PathNode>();
+    public List<PathNode> highlightedPath = new List<PathNode>();
     private Color startingColour;
     private Vector3 lastMousePosition;
     private Vector3 lastObjectPosition;
@@ -53,7 +54,7 @@ public class PathFindingVisual : MonoBehaviour {
     }
 
     private void LateUpdate() {
-        if (updateMesh) {
+        if (updateMesh ) {
             updateMesh = false;
             UpdateFloorTile(floorTileToUpdateX, floorTileToUpdateY);
         }
@@ -103,6 +104,10 @@ public class PathFindingVisual : MonoBehaviour {
         if (highlightedPath.Count() > 0) {
             UnHighlightPath();
         }
+         if (EventSystem.current.IsPointerOverGameObject()){
+            UnHighlightPath();
+            return;
+         }
 
         if (path == null) {
             return;
@@ -154,10 +159,18 @@ public class PathFindingVisual : MonoBehaviour {
         }
     }
 
+
     private void UnHighlightPath(){
         for (int i = highlightedPath.Count() - 1; i >= 0; i--){
             UnHighlightTile(highlightedPath[i].x, highlightedPath[i].y);
             highlightedPath.RemoveAt(i);
+        }
+    }
+
+    public void UnHighlightPath(List<PathNode> pathToUnHighlight){
+        for (int i = pathToUnHighlight.Count() - 1; i >= 0; i--){
+            UnHighlightTile(pathToUnHighlight[i].x, pathToUnHighlight[i].y);
+            pathToUnHighlight.RemoveAt(i);
         }
     }
 

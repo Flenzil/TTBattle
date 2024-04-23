@@ -12,6 +12,7 @@ public class UIWeaponsDisplay : MonoBehaviour
     private UIDocument uIDocument;
     private GameObject activeCreature = null;
     public VisualTreeAsset weaponButtonTemplate;
+    public StyleSheet weaponButtonStyle;
 
     private void OnEnable() {
         uIDocument = GetComponent<UIDocument>();
@@ -24,7 +25,7 @@ public class UIWeaponsDisplay : MonoBehaviour
             List<Attack> attacks = UGame.GetActiveCreatureActions().GetAttacks();
 
             for (int i = 0; i < attacks.Count; i++){
-                WeaponButton weaponButton = new WeaponButton(attacks[i], weaponButtonTemplate);
+                WeaponButton weaponButton = new WeaponButton(attacks[i], weaponButtonTemplate, weaponButtonStyle);
                 uIDocument.rootVisualElement.Q("WeaponRow").Add(weaponButton.button);
             }
 
@@ -39,11 +40,12 @@ class WeaponButton{
     public Attack attack;
     private Actions activeCreatureActions;
 
-    public WeaponButton(Attack attack, VisualTreeAsset template){
+    public WeaponButton(Attack attack, VisualTreeAsset template, StyleSheet style){
 
         this.attack = attack;
         button = template.Instantiate().Q<Button>();
         button.text = attack.GetAttackName();
+        button.styleSheets.Add(style);
         button.RegisterCallback<ClickEvent>(OnClick);
         activeCreatureActions = UGame.GetActiveCreature().GetComponent<Actions>();
     }
