@@ -22,7 +22,7 @@ public class RightClickMenu : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(1)){
+        if (Input.GetMouseButtonDown(1) && UGame.GetActiveCreature() != null){
             Vector3 mousePosition = UGame.GetMousePosition3D(Camera.main);
 
             Vector3 mouseScreenPosition = Input.mousePosition;
@@ -30,7 +30,7 @@ public class RightClickMenu : MonoBehaviour
             AddContainer(mouseScreenPosition);
 
             AddButton("Move Here", () => {
-                Debug.Log("Moving");
+                PathFindingManager.Instance.SetTargetPosition(mousePosition);
                 }
             );
 

@@ -18,7 +18,7 @@ public class GameManager : MonoBehaviour {
     public float cellSize = 1f;
     public bool visualiseGrid = true;
 
-    private static GameManager _instance;
+    private static GameManager instance;
     public GameObject activePlayer {get; set;}
     List<GameObject> initiativeOrder;
 
@@ -28,7 +28,7 @@ public class GameManager : MonoBehaviour {
     }
 
     private void Awake(){
-        _instance = this;
+        instance = this;
 
         pathfinding = new Pathfinding(floorWidth, floorHeight, cellSize);
         if (visualiseGrid){
@@ -59,9 +59,9 @@ public class GameManager : MonoBehaviour {
 
     public static GameManager Instance {
         get {
-            if (_instance is null)
+            if (instance == null)
                 Debug.Log("Game Manager is null");
-            return _instance;
+            return instance;
         }
     }
 

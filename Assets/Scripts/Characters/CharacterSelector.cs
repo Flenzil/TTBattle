@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using GameUtils;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class CharacterSelector : MonoBehaviour
 {
@@ -24,6 +25,10 @@ public class CharacterSelector : MonoBehaviour
     void LateUpdate()
     {
         if (Input.GetMouseButton(0)){
+
+            if (EventSystem.current.IsPointerOverGameObject()){
+                return;
+            }
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             bool isHit = Physics.Raycast(ray, out hit);

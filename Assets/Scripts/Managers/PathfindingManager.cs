@@ -18,16 +18,30 @@ public class PathFindingManager : MonoBehaviour {
     //private Grid<PathNode> grid = Pathfinding.Instance.GetGrid(); 
     private Vector3 lastMousePosition;
     private Vector3 lastObjectPosition;
+    private static PathFindingManager instance;
 
     public List<PathNode> path;
 
 
     [SerializeField] PathFindingVisual pathFindingVisual;
 
+    public static PathFindingManager Instance {
+        get {
+            if (instance == null)
+                Debug.Log("Pathfinding Manager is null");
+            return instance;
+        }
+    }
+
+    private void Awake(){
+        instance = this;
+    }
+
     private void Update() {
 
         if (EventSystem.current.IsPointerOverGameObject()){
             pathFindingVisual.UnHighlightPath(pathFindingVisual.highlightedPath);
+            HandleMovement();
             return;
         }
 
