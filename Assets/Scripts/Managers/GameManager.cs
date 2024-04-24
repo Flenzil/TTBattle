@@ -45,12 +45,15 @@ public class GameManager : MonoBehaviour {
 
     private void Update() {
         if (Input.GetMouseButtonDown(1)) {
+            /*
             // Vector3 mouseWorldPosition = UtilsClass.GetMouseWorldPosition();
             Vector3 mouseWorldPosition = UGame.GetMousePosition3D(Camera.main, "Ground");
             float cellSize = pathfinding.GetGrid().GetCellSize();
             pathfinding.GetGrid().GetXY(mouseWorldPosition, out int x, out int y);
             pathfinding.GetNode(x, y).SetIsWalkable(!pathfinding.GetNode(x,y).isWalkable);
+            */
         }
+
     }
 
 

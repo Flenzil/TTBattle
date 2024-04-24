@@ -15,7 +15,7 @@ public class UIHealth : MonoBehaviour
 
     private void OnEnable(){
         uIDocument = GetComponent<UIDocument>();
-
+        
     }
 
     private void Update(){
