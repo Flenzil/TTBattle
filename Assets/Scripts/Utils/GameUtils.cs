@@ -37,6 +37,10 @@ namespace GameUtils {
             return GetActiveCreature().GetComponent<Health>();
         }
 
+        public static Attack GetActiveAttack(){
+            return UGame.GetActiveCreature().GetComponent<Actions>().GetActiveAttack();
+        }
+
         public static CreatureStats GetCreatureStats(GameObject creature){
             return creature.GetComponent<CreatureStats>();
         }

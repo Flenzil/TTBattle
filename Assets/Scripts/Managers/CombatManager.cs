@@ -7,12 +7,12 @@ using System;
 
 public class CombatManager : MonoBehaviour
 {
-    [SerializeField] PathFindingManager pathfindingManager;
+    private static CombatManager instance;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        instance = this;
     }
 
     // Update is called once per frame
@@ -22,16 +22,22 @@ public class CombatManager : MonoBehaviour
             bool isHit = Physics.Raycast(ray, out RaycastHit hit);
             if (isHit){
                 if (hit.transform.GameObject().layer == LayerMask.NameToLayer("Creatures")){
-                    PathToTarget(hit.transform.GameObject());
-
-                    Attack(hit.transform.GameObject(), UGame.GetActiveCreature().GetComponent<Actions>().GetActiveAttack());
+                    Attack(hit.transform.GameObject(), UGame.GetActiveAttack());
                 }
             }
         }
     }
 
-    private void Attack(GameObject target, Attack attack){
+    public static CombatManager Instance {
+        get {
+            if (instance == null)
+                Debug.Log("Combat Manager is null");
+            return instance;
+        }
+    }
 
+    public void Attack(GameObject target, Attack attack){
+        PathToTarget(target);
         AbilityScore attackAbility = attack.GetDamageModifier();
 
         int modifierDamage = AbilityModifier(
@@ -80,6 +86,6 @@ public class CombatManager : MonoBehaviour
     }
 
     private void PathToTarget(GameObject target){
-        pathfindingManager.SetTargetPosition(target.transform.GetChild(0).transform.position);
+        PathFindingManager.Instance.SetTargetPosition(target.transform.GetChild(0).transform.position);
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using CreatureUtils;
 using GameUtils;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -13,19 +14,36 @@ public class RightClickMenu : MonoBehaviour
     private UIDocument uIDocument;
     private VisualElement root;
     private VisualElement container;
+    private Vector3 mouseScreenPosition;
+    private float fadoutStart = 200f;
+    private float fadoutEnd = 500f;
 
     void OnEnable(){
         uIDocument = GetComponent<UIDocument>();
         root = uIDocument.rootVisualElement;
+        root.styleSheets.Add(buttonStyle);
     }
 
     // Update is called once per frame
     void Update()
     {
+        //float opacity = container.resolvedStyle.opacity;
+
+        if (container != null){
+            float distanceFromBox = Vector3.Distance(Input.mousePosition, mouseScreenPosition);
+            if (distanceFromBox > fadoutStart){
+                container.style.opacity = 1 - (float)Math.Pow((distanceFromBox - fadoutStart)/fadoutEnd, 0.5f);
+            }
+        }
+
+        //container.style.color = new Color(currentColor.r, currentColor.g, currentColor.b, currentColor.a - distanceFromBox / fadoutDistance);
+        if (Vector3.Distance(Input.mousePosition, mouseScreenPosition) > fadoutEnd){
+            root.Clear();
+        }
+
         if (Input.GetMouseButtonDown(1) && UGame.GetActiveCreature() != null){
             Vector3 mousePosition = UGame.GetMousePosition3D(Camera.main);
-
-            Vector3 mouseScreenPosition = Input.mousePosition;
+            mouseScreenPosition = Input.mousePosition;
 
             AddContainer(mouseScreenPosition);
 
@@ -34,9 +52,9 @@ public class RightClickMenu : MonoBehaviour
                 }
             );
 
-            if (IsMouseClickOnCreature()){
+            if (IsMouseClickOnCreature(out RaycastHit hit)){
                 AddButton("Attack", ()=>{
-                    Debug.Log("Attacking");
+                    CombatManager.Instance.Attack(hit.transform.GameObject(), UGame.GetActiveAttack());
                     }
                 );
             }
@@ -63,9 +81,9 @@ public class RightClickMenu : MonoBehaviour
         container.Add(box);
     }
 
-    private bool IsMouseClickOnCreature(){
+    private bool IsMouseClickOnCreature(out RaycastHit hit){
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        bool isHit = Physics.Raycast(ray, out RaycastHit hit);
+        bool isHit = Physics.Raycast(ray, out hit);
 
         if (isHit){
             if (hit.transform.GameObject().layer == LayerMask.NameToLayer("Creatures")){
