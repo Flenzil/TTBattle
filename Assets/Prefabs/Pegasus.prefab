@@ -458,9 +458,12 @@ MonoBehaviour:
   weapons: []
   naturalWeapons:
   - attackName: Hooves
+    attackRange: 5
     damageDieAmount: 2
     damageDieSize: 1
     damageType: 0
     damageModifier: 0
     bonusToHit: 0
+    overrideToHit: 0
     bonusToDamage: 0
+    overrideDamage: 0

@@ -38,7 +38,15 @@ namespace GameUtils {
         }
 
         public static Attack GetActiveAttack(){
-            return UGame.GetActiveCreature().GetComponent<Actions>().GetActiveAttack();
+            return GetActiveCreature().GetComponent<Actions>().GetActiveAttack();
+        }
+
+        public static Vector3 GetActiveCreaturePosition(){
+            if (GetActiveCreature().transform.childCount == 0){
+                return GetActiveCreature().transform.position;
+            } else {
+                return GetActiveCreature().transform.GetChild(0).transform.position;
+            }
         }
 
         public static CreatureStats GetCreatureStats(GameObject creature){

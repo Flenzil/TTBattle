@@ -83,6 +83,12 @@ public class PathFindingManager : MonoBehaviour {
         } 
     }
 
+    public void SetPath(List<Vector3> vectorPath){
+        if (vectorPath != null){
+            path = Vector3ListToPathNodeList(vectorPath);
+        }
+    }
+
     private void HighLightPath(){
         if (UGame.GetActiveCreature() == null){
             return;
@@ -220,6 +226,29 @@ public class PathFindingManager : MonoBehaviour {
         currentPathIndex = 0;
 
         SetPath(GetPosition(), targetPosition);
+
+        if (path != null && path.Count > 1) {
+
+            path.RemoveAt(0);
+
+            if (path != null) {
+                ClearCreatureSpace(UGame.GetActiveCreature());
+                SetSpaceToOccupied(path.Last(), UGame.GetActiveCreature());
+                pathFindingVisual.SetPath(path);
+                pathFindingVisual.TileHighlighting();
+                pathVectorList = PathNodeListToVector3List(path);
+                }
+        }
+    }
+
+    public void SetTargetPosition(List<Vector3> vectorPath) {
+
+        currentPathIndex = 0;
+
+        //SetPath(GetPosition(), targetPosition);
+        if (path != null){
+            path = Vector3ListToPathNodeList(vectorPath);
+        }
 
         if (path != null && path.Count > 1) {
 

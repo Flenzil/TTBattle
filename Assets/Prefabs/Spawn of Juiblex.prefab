@@ -242,6 +242,7 @@ MonoBehaviour:
   weapons: []
   naturalWeapons:
   - attackName: Psuedopod
+    attackRange: 10
     damageDieAmount: 6
     damageDieSize: 1
     damageType: 1

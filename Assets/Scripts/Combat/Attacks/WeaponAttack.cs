@@ -51,6 +51,11 @@ public class WeaponAttack : Attack, IAttack
         return weapon.weaponType;
     }
 
+    public override int GetWeaponRange()
+    {
+        return weapon.weaponRange;
+    }
+
     public override void Override(out bool overrideToHit, out bool overrideDamage)
     {
         overrideToHit = false;

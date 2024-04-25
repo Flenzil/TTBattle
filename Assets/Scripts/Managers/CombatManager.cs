@@ -4,6 +4,7 @@ using CombatUtils;
 using GameUtils;
 using Unity.VisualScripting;
 using System;
+using System.Collections.Generic;
 
 public class CombatManager : MonoBehaviour
 {
@@ -106,6 +107,10 @@ public class CombatManager : MonoBehaviour
     }
 
     private void PathToTarget(GameObject target){
-        PathFindingManager.Instance.SetTargetPosition(target.transform.GetChild(0).transform.position);
+        List<Vector3> path = Pathfinding.Instance.FindPath(UGame.GetActiveCreaturePosition(), target.transform.position);
+        if (path.Count * 5 > UGame.GetActiveAttack().GetWeaponRange()){
+            PathFindingManager.Instance.SetTargetPosition(path);
+            //PathFindingManager.Instance.SetPath(path);
+        }
     }
 }

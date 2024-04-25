@@ -13,6 +13,7 @@ public class Weapon : ScriptableObject {
     public List<DamageType> damageType;
     public AbilityScore damageModifier;
     public WeaponType weaponType;
+    public int weaponRange;
 
     public bool magical = false;
 

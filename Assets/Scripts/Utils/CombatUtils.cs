@@ -82,6 +82,7 @@ namespace CombatUtils {
     public struct NaturalWeapon {
 
         public string attackName;
+        public int attackRange;
         public int damageDieAmount;
         public Die damageDieSize;
         public DamageType damageType;
