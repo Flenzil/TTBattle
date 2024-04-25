@@ -247,4 +247,6 @@ MonoBehaviour:
     damageType: 1
     damageModifier: 6
     bonusToHit: 11
+    overrideToHit: 1
     bonusToDamage: 0
+    overrideDamage: 1

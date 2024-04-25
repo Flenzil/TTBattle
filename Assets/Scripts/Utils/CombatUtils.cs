@@ -1,5 +1,6 @@
 using System;
 using CreatureUtils;
+using UnityEngine;
 
 namespace CombatUtils {
 
@@ -25,8 +26,10 @@ namespace CombatUtils {
         d6,
         d8,
         d10,
+        d12,
         d20,
-        d100
+        d100,
+        none
     }
 
     public enum WeaponCatagory{
@@ -75,7 +78,8 @@ namespace CombatUtils {
         whip,
     }
 
-    [Serializable] public struct NaturalWeapon {
+    [Serializable] 
+    public struct NaturalWeapon {
 
         public string attackName;
         public int damageDieAmount;
@@ -83,11 +87,13 @@ namespace CombatUtils {
         public DamageType damageType;
         public AbilityScore damageModifier;
         public int bonusToHit;
-        public bool overrideToHitBonus;
+        [Tooltip("Tick to ignore the usual to hit calculation (ability modifier + proficiency) and replace with the bonus to hit value")]
+        public bool overrideToHit;
         public int bonusToDamage;
-        public bool overrideDamageBonus;
-
+        [Tooltip("Tick to ignore the usual damage bonus calculation (ability modifier) and replace with the bonus to damage value")]
+        public bool overrideDamage;
     }
+
 
     public static class UCombat {
 
@@ -120,7 +126,7 @@ namespace CombatUtils {
             }
         }
         public static int RollDice(Die die){
-            int dieMax = 0;
+            int dieMax;
             switch (die){
                 case Die.d4:
                     dieMax = 4;
@@ -134,11 +140,17 @@ namespace CombatUtils {
                 case Die.d10:
                     dieMax = 10;
                     break;
+                case Die.d12:
+                    dieMax = 12;
+                    break;
                 case Die.d20:
                     dieMax = 20;
                     break;
                 case Die.d100:
                     dieMax = 100;
+                    break;
+                default:
+                    dieMax = 0;
                     break;
 
             }

@@ -10,6 +10,7 @@ public class NaturalWeaponAttack : Attack, IAttack {
         this.naturalWeapon = naturalWeapon;
     }
 
+
     public override DamageType GetDamageType()
     {
         return naturalWeapon.damageType; 
@@ -46,5 +47,11 @@ public class NaturalWeaponAttack : Attack, IAttack {
     public override WeaponType GetWeaponType()
     {
         return WeaponType.natural;
+    }
+
+    public override void Override(out bool overrideToHit, out bool overrideDamage)
+    {
+        overrideToHit = naturalWeapon.overrideToHit;
+        overrideDamage = naturalWeapon.overrideDamage;
     }
 }

@@ -13,5 +13,6 @@ public abstract class Attack
     public abstract int GetBonusToDamage();
     public abstract int GetBonusToHit();
     public abstract WeaponType GetWeaponType();
+    public abstract void Override(out bool overrideToHit, out bool overrideDamage);
 
 }

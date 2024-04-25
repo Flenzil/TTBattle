@@ -41,19 +41,31 @@ public class CombatManager : MonoBehaviour
 
         AbilityScore attackAbility = attack.GetDamageModifier();
 
-        int modifierDamage = AbilityModifier(
-            UGame.GetActiveCreatureStats()
-            .GetAbilityScores()[attackAbility]
-            ) + attack.GetBonusToDamage();
+        attack.Override(out bool overrideToHit, out bool overrideDamage);
 
-        int modifierToHit = AbilityModifier(
-            UGame.GetActiveCreatureStats()
-            .GetAbilityScores()[attackAbility]
-            ) + attack.GetBonusToHit();
-
-        if (IsProfientWithWeapon()){
-            modifierToHit += UGame.GetActiveCreatureStats().GetProficiencyBonus();
+        int modifierDamage;
+        if (overrideDamage){
+            modifierDamage = attack.GetBonusToDamage();
+        } else{
+            modifierDamage = AbilityModifier(
+                UGame.GetActiveCreatureStats()
+                .GetAbilityScores()[attackAbility]
+                ) + attack.GetBonusToDamage();
         }
+
+        int modifierToHit;
+        if (overrideToHit) {
+            modifierToHit = attack.GetBonusToHit();
+        } else {
+            modifierToHit = AbilityModifier(
+                UGame.GetActiveCreatureStats()
+                .GetAbilityScores()[attackAbility]
+                ) + attack.GetBonusToHit();
+
+            if (IsProfientWithWeapon()){
+                modifierToHit += UGame.GetActiveCreatureStats().GetProficiencyBonus();
+            }
+        }   
 
         int diceDamage = attack.GetDamageRoll();
 

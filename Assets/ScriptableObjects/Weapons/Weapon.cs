@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using CombatUtils;
 using CreatureUtils;
+using UnityEngine.Assertions.Must;
 
 [CreateAssetMenu]
 public class Weapon : ScriptableObject {

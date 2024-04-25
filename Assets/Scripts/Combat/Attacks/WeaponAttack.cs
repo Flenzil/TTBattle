@@ -50,4 +50,10 @@ public class WeaponAttack : Attack, IAttack
     {
         return weapon.weaponType;
     }
+
+    public override void Override(out bool overrideToHit, out bool overrideDamage)
+    {
+        overrideToHit = false;
+        overrideDamage = false;
+    }
 }
