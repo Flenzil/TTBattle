@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 355a640c2b3e8d047ad40a57323fa49f, type: 3}
+  m_Name: Mace
+  m_EditorClassIdentifier: 
+  damageDie: 02000000
+  damageType: 00000000
+  damageModifier: 0
+  weaponType: 20
+  magical: 0
+  magicalEffects: {fileID: 0}

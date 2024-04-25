@@ -45,4 +45,9 @@ public class WeaponAttack : Attack, IAttack
     {
         return 0;
     }
+
+    public override WeaponType GetWeaponType()
+    {
+        return weapon.weaponType;
+    }
 }

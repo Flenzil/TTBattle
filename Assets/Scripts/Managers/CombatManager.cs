@@ -38,6 +38,7 @@ public class CombatManager : MonoBehaviour
 
     public void Attack(GameObject target, Attack attack){
         PathToTarget(target);
+
         AbilityScore attackAbility = attack.GetDamageModifier();
 
         int modifierDamage = AbilityModifier(
@@ -49,6 +50,10 @@ public class CombatManager : MonoBehaviour
             UGame.GetActiveCreatureStats()
             .GetAbilityScores()[attackAbility]
             ) + attack.GetBonusToHit();
+
+        if (IsProfientWithWeapon()){
+            modifierToHit += UGame.GetActiveCreatureStats().GetProficiencyBonus();
+        }
 
         int diceDamage = attack.GetDamageRoll();
 
@@ -66,12 +71,12 @@ public class CombatManager : MonoBehaviour
             Debug.Log($"{attacker} CRITS {name} with {weapon} for {damage} damage!");
         }
         else if (dieRoll + modifierToHit >= UGame.GetCreatureStats(target).GetAC()){
-            Debug.Log($"{attacker} rolls {dieRoll + modifierToHit}");
+            Debug.Log($"{attacker} rolls {dieRoll} + {modifierToHit}");
             target.GetComponent<Health>().Damage(damage);
             Debug.Log($"{attacker} hits {name} with {weapon} for {damage} damage!");
         } 
         else {
-            Debug.Log($"{attacker} rolls {dieRoll + modifierToHit}");
+            Debug.Log($"{attacker} rolls {dieRoll} + {modifierToHit}");
             Debug.Log($"{attacker} misses {name} with {weapon}!");
         }
         Debug.Log($"{name} is now on {target.GetComponent<Health>().GetCurrentHP()} HP");
@@ -82,7 +87,10 @@ public class CombatManager : MonoBehaviour
             return 0;
         } 
         return (int)((abilityScore * 0.5f) - 5);
+    }
 
+    private bool IsProfientWithWeapon(){
+        return UGame.GetActiveCreatureStats().GetWeaponProficiencies().Contains(UGame.GetActiveAttack().GetWeaponType());
     }
 
     private void PathToTarget(GameObject target){

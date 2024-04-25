@@ -42,4 +42,9 @@ public class NaturalWeaponAttack : Attack, IAttack {
     public override int GetBonusToDamage(){
         return naturalWeapon.bonusToDamage;
     }
+
+    public override WeaponType GetWeaponType()
+    {
+        return WeaponType.natural;
+    }
 }

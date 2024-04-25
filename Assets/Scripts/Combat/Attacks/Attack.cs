@@ -12,5 +12,6 @@ public abstract class Attack
     public abstract AbilityScore GetDamageModifier();
     public abstract int GetBonusToDamage();
     public abstract int GetBonusToHit();
+    public abstract WeaponType GetWeaponType();
 
 }

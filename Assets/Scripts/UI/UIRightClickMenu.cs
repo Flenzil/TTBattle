@@ -86,7 +86,10 @@ public class RightClickMenu : MonoBehaviour
         bool isHit = Physics.Raycast(ray, out hit);
 
         if (isHit){
-            if (hit.transform.GameObject().layer == LayerMask.NameToLayer("Creatures")){
+            if (
+                hit.transform.GameObject().layer == LayerMask.NameToLayer("Creatures")
+                && hit.transform.gameObject != UGame.GetActiveCreature()
+                ){
                 return true;
             }
         }
