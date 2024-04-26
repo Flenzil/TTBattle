@@ -70,7 +70,8 @@ public class Pathfinding {
 
                 List<PathNode> surroundingNodes = GetGridObjectsSurroundingCreature(
                     endNode.GetOccupyingCreature(), 
-                    UCreature.CreatureWidthAsInt(UGame.GetActiveCreature().GetComponent<CreatureStats>().GetSize())
+                    UCreature.CreatureWidthAsInt(UGame.GetActiveCreature().GetComponent<CreatureStats>().GetSize()),
+                    UGame.GetActiveAttack().GetWeaponRange()
                 );
                 
                 foreach(PathNode node in surroundingNodes) {
@@ -99,8 +100,6 @@ public class Pathfinding {
         startNode.CalculateFCost();
 
         while (openList.Count > 0) {
-            bool breakCondition = Input.GetMouseButtonDown(2);
-
             PathNode currentNode = GetLowestFCostNode(openList);
             if (
                 IsAnyPartOfCreatureAtDestination(currentNode, endNode)
@@ -155,6 +154,7 @@ public class Pathfinding {
             }
         }
         // No path found
+        Debug.Log("No Path Found");
         return null;
     }
     
@@ -178,21 +178,32 @@ public class Pathfinding {
         return false;
     }
 
-    private List<PathNode> GetGridObjectsSurroundingCreature(GameObject creature, int searchWidth){
+    private List<PathNode> GetGridObjectsSurroundingCreature(GameObject creature, int searchWidth, int weaponRange){
         List<PathNode> surroundingGridObjects = new();
 
         UPathing.GetSeekRadius(creature.GetComponent<CreatureStats>().GetSize(), out int seekRadiusStart, out int seekRadiusEnd);
+        weaponRange /= 5;
 
         PathNode centre = grid.GetGridObject(creature.transform.GetChild(0).transform.position);
 
-        for (int i = seekRadiusStart - searchWidth; i <= seekRadiusEnd + searchWidth; i++){
-            for (int j = seekRadiusStart - searchWidth; j <= seekRadiusEnd + searchWidth; j++){
+        for (int i = seekRadiusStart - weaponRange - searchWidth; i <= seekRadiusEnd + weaponRange+ searchWidth; i++){
+            for (int j = seekRadiusStart - weaponRange - searchWidth; j <= seekRadiusEnd + weaponRange + searchWidth; j++){
                 if (!IsInsideGrid(centre.x + i - searchWidth, centre.y + j - searchWidth)) {
                     continue;
                 }
                 if (!IsInsideGrid(centre.x + i, centre.y + j)) {
                     continue;
                 }
+                if (GetNode(centre.x + i, centre.y + j).GetOccupyingCreature() == creature) {
+                    continue;
+                }
+
+                if (
+                    Math.Abs(centre.x + i) < centre.x + searchWidth / 2 + weaponRange 
+                    || Math.Abs(centre.y + j) < centre.y + searchWidth / 2 + weaponRange
+                    ){
+                        continue;
+                    }
 
                 surroundingGridObjects.Add(GetNode(centre.x + i, centre.y + j));
             }
@@ -201,10 +212,37 @@ public class Pathfinding {
     }
 
     private bool IsAnyPartOfCreatureAtDestination(PathNode currentNode, PathNode endNode){
-        UPathing.GetSeekRadius(UGame.GetActiveCreatureSize(), out int seekRadiusStart, out int seekRadiusEnd);
+        UPathing.GetSeekRadius(
+            UGame.GetActiveCreatureSize(),
+            out int attackerSeekRadiusStart, 
+            out int attackerSeekRadiusEnd
+            );
+
+        int weaponRange = 0;
+        int targetSeekRadiusStart = 0;
+        int targetSeekRadiusEnd = 0;
+
+        if (
+            UGame.GetActiveAttack() != null
+            && endNode.isOccupied
+            && endNode.GetOccupyingCreature() != UGame.GetActiveCreature()
+        ){
+            UPathing.GetSeekRadius(
+                endNode.GetOccupyingCreature().GetComponent<CreatureStats>().GetSize(),
+                out targetSeekRadiusStart, 
+                out targetSeekRadiusEnd
+                );
+            weaponRange = UGame.GetActiveAttack().GetWeaponRange() / 5;
+        }
+
+        int seekRadiusStart = attackerSeekRadiusStart - targetSeekRadiusStart - weaponRange;
+        int seekRadiusEnd = attackerSeekRadiusEnd + targetSeekRadiusEnd + weaponRange;
+
         for (int i = seekRadiusStart; i <= seekRadiusEnd; i++){
             for (int j = seekRadiusStart; j <= seekRadiusEnd; j++){
-                if (GetNode(currentNode.x + i, currentNode.y + j) == endNode) return true;
+                if (GetNode(endNode.x + i, endNode.y + j) == currentNode) {
+                    return true;
+                }
             }
         }
         return false;
@@ -219,7 +257,11 @@ public class Pathfinding {
             return true;
         }
 
-        if (Math.Abs(UCreature.CreatureSizesDifference(node.GetOccupyingCreatureSize(), activeCreature.GetComponent<CreatureStats>().GetSize())) >= 2) {
+        if (Math.Abs(UCreature.CreatureSizesDifference(
+            node.GetOccupyingCreatureSize(),
+            activeCreature.GetComponent<CreatureStats>().GetSize()
+            )) >= 2
+        ) {
             return true;
         }
 
@@ -366,8 +408,46 @@ public class Pathfinding {
             currentNode = currentNode.cameFromNode;
         }
         path.Reverse();
+        
 
+        /*
+        if (
+            path.Last().GetOccupyingCreature() != null
+            && path.Last().GetOccupyingCreature() != UGame.GetActiveCreature()
+        ){
+            Debug.Log(path.Last());
+            path = EnsurePathEndsOnEdgeOfWeaponRange(path, endNode);
+        }
+        */
         path = EnsurePathEndIsNotInsideCreature(path);
+        return path;
+    }
+
+    private List<PathNode> EnsurePathEndsOnEdgeOfWeaponRange(List<PathNode> path, PathNode endNode){
+        UPathing.GetSeekRadius(
+            endNode.GetOccupyingCreature().GetComponent<CreatureStats>().GetSize()
+            , out int targetSeekRadiusStart
+            , out int targetSeekRadiusEnd
+        );
+        UPathing.GetSeekRadius(
+            UGame.GetActiveCreatureStats().GetSize()
+            , out int attackerSeekRadiusStart
+            , out int attackerSeekRadiusEnd
+        );
+
+        
+        int weaponRange = UGame.GetActiveAttack().GetWeaponRange() / 5 - 1;
+
+        int seekRadiusStart = targetSeekRadiusStart - attackerSeekRadiusStart - weaponRange + 5;
+        int seekRadiusEnd = targetSeekRadiusEnd + attackerSeekRadiusEnd + weaponRange + 5;
+
+        for (int i = seekRadiusStart; i <= seekRadiusEnd; i++){
+            for (int j = seekRadiusStart; j <= seekRadiusEnd; j++){
+                path.Remove(GetNode(endNode.x + i, endNode.y + j));
+
+            }
+
+        }
         return path;
     }
 
@@ -392,8 +472,10 @@ public class Pathfinding {
 
     private bool IsAnyPartOfCreatureSpaceOccupied(GameObject creature, int x, int y){
         UPathing.GetSeekRadius(creature.GetComponent<CreatureStats>().GetSize(), out int seekRadiusStart, out int seekRadiusEnd);
-        for (int i = seekRadiusStart; i <= seekRadiusEnd; i++){
-            for (int j = seekRadiusStart; j <= seekRadiusEnd; j++){
+        //int weaponRange = UGame.GetActiveAttack().GetWeaponRange() / 5 - 1;
+        int weaponRange = 0;
+        for (int i = seekRadiusStart - weaponRange; i <= seekRadiusEnd + weaponRange; i++){
+            for (int j = seekRadiusStart - weaponRange; j <= seekRadiusEnd + weaponRange; j++){
                 if (!IsInsideGrid(x + i, y + j)){
                     continue;
                 }

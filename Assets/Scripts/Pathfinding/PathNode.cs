@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using CreatureUtils;
 using UnityEngine;
+using UnityEngine.TextCore;
 
 public class PathNode
 {
@@ -83,6 +84,6 @@ public class PathNode
 
     public override string ToString()
     {
-        return GetOccupyingCreature().name;
+        return x + ", " + y;
     }
 }

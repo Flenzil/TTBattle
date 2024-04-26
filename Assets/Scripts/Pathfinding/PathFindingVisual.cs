@@ -60,45 +60,6 @@ public class PathFindingVisual : MonoBehaviour {
         }
         if (GameManager.Instance.activePlayer != null) TileHighlighting();
     }
-    
-    private Vector3 GetPosition(GameObject player){
-        if (player.transform.childCount == 0) return player.transform.position;
-        else return player.transform.GetChild(0).transform.position;
-    }
-
-    private bool IsActiveCreature(GameObject creature) {
-        if (creature == UGame.GetActiveCreature()) return true;
-        return false;
-    }
-
-    /*
-    private void TileHighlighting(){
-        if (!IsMouseOverNewGridNode() && !ObjectHasMoved()) return;
-
-        if (highlightedPath.Count() > 0) UnHighlightPath();
-
-        Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit);
-
-        if (hit.transform.GameObject().layer == LayerMask.NameToLayer("Creatures") && !IsActiveCreature(hit.transform.GameObject())) return;
-
-        grid.GetXY( GetPosition(UGame.GetActiveCreature()), out int currentX, out int currentY);
-
-        int endX, endY;
-        if (IsActiveCreature(hit.transform.GameObject())) {
-            grid.GetXY(UGame.GetMousePosition3D(Camera.main, "Ground"), out endX, out endY);
-        } else {
-            grid.GetXY(hit.point, out endX, out endY);
-        }
-
-        if (!IsInsideGrid(endX, endY)) return;
-
-        List<PathNode> path = PathFindingManager.;
-
-        if (path == null) return;
-
-        HighLightPath(path);
-    }
-    */
 
     public void TileHighlighting(){
         if (highlightedPath.Count() > 0) {
