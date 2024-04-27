@@ -5,16 +5,35 @@ using CreatureUtils;
 using CombatUtils;
 using System;
 using System.Linq;
+using UnityEngine.Rendering;
 
 public class CreatureStats : MonoBehaviour
 {
     [SerializeField] Creature stats;
 
+    private int remainingMovement;
     public int GetMaxHP(){ return stats.maxHP;}
     public int GetAC(){ return stats.ac;}
     public int GetMovementSpeed(){ return stats.moveSpeed;}
     public CreatureSize GetSize(){ return stats.size;}
     public int GetLevel(){ return stats.level;}
+
+    void Start(){
+        remainingMovement = GetMovementSpeed();
+    }
+
+    public int GetRemainingMovement(){
+        return remainingMovement;
+    }
+
+    public void SetReaminingMovement(int movement){
+        remainingMovement = movement;
+    }
+
+
+    public void DecreaseRemainingMovement(int decrease){
+        remainingMovement -= decrease;
+    }
 
 
     public List<WeaponType> GetWeaponProficiencies(){

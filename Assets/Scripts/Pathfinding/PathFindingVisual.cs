@@ -92,7 +92,7 @@ public class PathFindingVisual{
 
         for (int i = 1; i < path.Count(); i++){
             PathNode node = path[i];
-            int speed = UGame.GetActiveCreature().GetComponent<CreatureStats>().GetMovementSpeed();
+            int speed = UGame.GetActiveCreatureStats().GetRemainingMovement();
             grid.GetXY(UGame.GetActiveCreature().transform.position, out int ObjectX, out int ObjectY);
 
             Color colour;

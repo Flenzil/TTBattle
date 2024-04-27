@@ -14,7 +14,6 @@ public class CameraMovement : MonoBehaviour
     void Start()
     {
         rotateOrigin = transform.position + Vector3.forward * 5f;
-        
     }
 
     // Update is called once per frame

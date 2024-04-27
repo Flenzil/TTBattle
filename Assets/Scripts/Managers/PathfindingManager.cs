@@ -20,7 +20,7 @@ public class PathFindingManager : MonoBehaviour {
     private Vector3 lastObjectPosition;
     private static PathFindingManager instance;
     private PathFindingVisual pathFindingVisual;
-
+    public int remainingMovement;
     public List<PathNode> path; 
 
     public static PathFindingManager Instance {
@@ -45,6 +45,7 @@ public class PathFindingManager : MonoBehaviour {
             return;
         }
 
+
         HighLightPath();
         HandleMovement();
 
@@ -63,6 +64,10 @@ public class PathFindingManager : MonoBehaviour {
             if (hitObject.layer == LayerMask.NameToLayer("Ground")){
                 SetTargetPosition(hit.point, false);
             }
+        }
+
+        if (Input.GetMouseButtonDown(4)){
+            UGame.GetActiveCreatureStats().SetReaminingMovement(UGame.GetActiveCreatureStats().GetMovementSpeed());
         }
 
         if (Input.GetMouseButtonDown(3)){
@@ -90,12 +95,59 @@ public class PathFindingManager : MonoBehaviour {
 
             if (path != null) {
                 ClearCreatureSpace(UGame.GetActiveCreature());
-                SetSpaceToOccupied(path.Last(), UGame.GetActiveCreature());
+                //SetSpaceToOccupied(path.Last(), UGame.GetActiveCreature());
                 pathFindingVisual.SetPath(path);
                 pathFindingVisual.TileHighlighting();
                 pathVectorList = PathNodeListToVector3List(path);
                 }
         }
+    }
+
+    private void HandleMovement() {
+
+        // Move the active creature towards the next pathNode in the path.
+        // When sufficiently close, move on to the next pathNode until the
+        // creature is at the end of the path or has run out of movement.
+
+        if (pathVectorList != null) {
+            Vector3 targetPosition = pathVectorList[currentPathIndex];
+            if (Vector3.Distance(GetPosition(), targetPosition) > 0.05f) {
+                Vector3 moveDirection = (targetPosition - GetPosition()).normalized;
+
+                UGame.GetActiveCreature().transform.position 
+                    += moveSpeed * Time.deltaTime * moveDirection;
+
+            } else {
+                currentPathIndex++;
+                UGame.GetActiveCreatureStats().DecreaseRemainingMovement(5);
+                
+                if (
+                    currentPathIndex >= pathVectorList.Count
+                    || UGame.GetActiveCreatureStats().GetRemainingMovement() == 0
+                    ) {
+                    StopMoving();
+                }
+            }
+        } 
+    }
+
+    private void StopMoving() {
+        GetGrid().GetXY(
+            pathVectorList[currentPathIndex - 1],
+            out int x,
+            out int y
+        );
+        
+        UPathing.SetCreatureSpaceToOccupied(
+            UGame.GetActiveCreature(),
+            GetGrid(),
+            x,
+            y
+        );
+
+        currentPathIndex = 0;
+
+        pathVectorList = null;
     }
 
     private Grid<PathNode> GetGrid() {
@@ -226,32 +278,6 @@ public class PathFindingManager : MonoBehaviour {
         return creature == UGame.GetActiveCreature();
     }
     
-    private void HandleMovement() {
-
-        // Move the active creature towards the next pathNode in the path.
-        // When sufficiently close, move on to the next pathNode until the
-        // creature is at the end of the path.
-
-        if (pathVectorList != null) {
-            Vector3 targetPosition = pathVectorList[currentPathIndex];
-            if (Vector3.Distance(GetPosition(), targetPosition) > 0.05f) {
-                Vector3 moveDirection = (targetPosition - GetPosition()).normalized;
-
-                UGame.GetActiveCreature().transform.position 
-                    += moveSpeed * Time.deltaTime * moveDirection;
-
-            } else {
-                currentPathIndex++;
-                if (currentPathIndex >= pathVectorList.Count) {
-                    StopMoving();
-                }
-            }
-        } 
-    }
-
-    private void StopMoving() {
-        pathVectorList = null;
-    }
 
     private void SetSpaceToOccupied(PathNode positionNode, GameObject creature){
         
