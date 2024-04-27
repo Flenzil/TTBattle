@@ -8,32 +8,22 @@ using System;
 using GameUtils;
 using UnityEngine.EventSystems;
 
-public class PathFindingVisual : MonoBehaviour {
+public class PathFindingVisual{
+
+    // Handles the visual elements of the pathfinding, mainly highlighting the tiles
+    // to visual the path and the GameObjects that make up the grid itself.
 
     private Grid<PathNode> grid;
-    private Mesh mesh;
-    private bool updateMesh;
     private GameObject floorTile;
     private GameObject wallTile;
     private GameObject[] floor;
-    private int floorTileToUpdateX;
-    private int floorTileToUpdateY;
-    public List<PathNode> highlightedPath = new List<PathNode>();
+    public List<PathNode> highlightedPath = new();
     private Color startingColour;
-    private Vector3 lastMousePosition;
-    private Vector3 lastObjectPosition;
     private List<PathNode> path;
 
 
     public void SetPath(List<PathNode> path){
         this.path = path;
-    }
-
-    private void Awake() {
-        mesh = new Mesh();
-        GetComponent<MeshFilter>().mesh = mesh;
-        lastMousePosition = UGame.GetMousePosition3D(Camera.main);
-        lastObjectPosition = Vector3.one * float.MaxValue;
     }
 
     public void SetGrid(Grid<PathNode> grid) {
@@ -43,29 +33,26 @@ public class PathFindingVisual : MonoBehaviour {
         ScaleTileToGrid(wallTile);
         CreateFloor();
 
-        grid.OnGridValueChanged += Grid_OnGridValueChanged;
     }
 
-    private void Grid_OnGridValueChanged(object sender, Grid<PathNode>.OnGridValueChangedEventArgs e){
-        // UpdatePathfindingVisual(); 
-        floorTileToUpdateX = e.x;
-        floorTileToUpdateY = e.y;
-        updateMesh = true;
+    public void SetFloorTile(GameObject floorTile){
+        this.floorTile = floorTile;
     }
 
-    private void LateUpdate() {
-        if (updateMesh ) {
-            updateMesh = false;
-            UpdateFloorTile(floorTileToUpdateX, floorTileToUpdateY);
-        }
-        if (GameManager.Instance.activePlayer != null) TileHighlighting();
+    public void SetWallTile(GameObject wallTile){
+        this.wallTile = wallTile;
     }
 
     public void TileHighlighting(){
+
+        // Controls when tiles should be highlighted an unhighlighted
+
         if (highlightedPath.Count() > 0) {
             UnHighlightPath();
         }
-         if (EventSystem.current.IsPointerOverGameObject()){
+
+        // Unhighlight if mouse is hovering over UI element
+        if (EventSystem.current.IsPointerOverGameObject()){
             UnHighlightPath();
             return;
          }
@@ -78,8 +65,11 @@ public class PathFindingVisual : MonoBehaviour {
     }
 
     private void HighlightTile(int x, int y, Color colour){
+
+        // Highlight a single tile at grid position (x, y)
+
         if (IsInsideGrid(x, y) ){
-            if (startingColour == default(Color)) {
+            if (startingColour == default) {
                 startingColour = floor[y + grid.GetHeight() * x].GetComponent<Renderer>().material.color;
             }
             floor[y + grid.GetHeight() * x].GetComponent<Renderer>().material.color = colour;
@@ -87,12 +77,19 @@ public class PathFindingVisual : MonoBehaviour {
     }
 
     private void UnHighlightTile(int x, int y){
+
+        // Returns tile to original colour 
+
         if (IsInsideGrid(x, y) ){
             floor[y + grid.GetHeight() * x].GetComponent<Renderer>().material.color = startingColour;
         }
     }
 
     private void HighLightPath(List<PathNode> path){
+
+        // Highlights all PathNodes in path and highlights surrounding tiles for creatures that are larger
+        // than 1 tile wide.
+
         for (int i = 1; i < path.Count(); i++){
             PathNode node = path[i];
             int speed = UGame.GetActiveCreature().GetComponent<CreatureStats>().GetMovementSpeed();
@@ -110,8 +107,16 @@ public class PathFindingVisual : MonoBehaviour {
                         continue;
                     }
 
-                    if (Math.Abs(ObjectX - (node.x + j)) + pathStart  > speed / 5.0f || Math.Abs(ObjectY - (node.y + k)) + pathStart > speed / 5.0f) colour = Color.red;
-                    else colour = Color.yellow;
+                    // Colour tiles beyond the creature's walking speed red.
+                    if (
+                        Math.Abs(ObjectX - (node.x + j)) + pathStart  > speed / 5.0f 
+                        || Math.Abs(ObjectY - (node.y + k)) + pathStart > speed / 5.0f
+                    ){
+                        colour = Color.red;
+                    } 
+                    else {
+                        colour = Color.yellow;
+                    }
 
                     HighlightTile(node.x + j, node.y + k, colour);
                     highlightedPath.Add(grid.GetGridObject(node.x + j, node.y + k));
@@ -122,6 +127,9 @@ public class PathFindingVisual : MonoBehaviour {
 
 
     private void UnHighlightPath(){
+
+        // Unhighlight all previously highlighted tiles.
+
         for (int i = highlightedPath.Count() - 1; i >= 0; i--){
             UnHighlightTile(highlightedPath[i].x, highlightedPath[i].y);
             highlightedPath.RemoveAt(i);
@@ -129,125 +137,72 @@ public class PathFindingVisual : MonoBehaviour {
     }
 
     public void UnHighlightPath(List<PathNode> pathToUnHighlight){
+
+        // Unhighlight given pathNodes
+
         for (int i = pathToUnHighlight.Count() - 1; i >= 0; i--){
             UnHighlightTile(pathToUnHighlight[i].x, pathToUnHighlight[i].y);
             pathToUnHighlight.RemoveAt(i);
         }
     }
 
-    private bool IsMouseOverNewGridNode(){
-        if (grid.GetGridObject(UGame.GetMousePosition3D(Camera.main)) != grid.GetGridObject(lastMousePosition)){
-            lastMousePosition = UGame.GetMousePosition3D(Camera.main);
-            return true;
-        } else return false;
-    }
-
-    private bool ObjectHasMoved(){
-        if (UGame.GetActiveCreature().transform.position != lastObjectPosition){
-            lastObjectPosition = UGame.GetActiveCreature().transform.position;
-            return true;
-        } else return false;
-    }
-
     private bool IsInsideGrid(int x, int y){
-        if (x < grid.GetWidth() && y < grid.GetHeight() && x >= 0 && y >= 0){
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private bool IsOnGridEdge(int x, int y){
-        if (x == 0 || x == grid.GetWidth() - 1 || y == 0 || y == grid.GetHeight() - 1){
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public void SetFloorTile(GameObject floorTile){
-        this.floorTile = floorTile;
-    }
-
-    public void SetWallTile(GameObject wallTile){
-        this.wallTile = wallTile;
+        return (
+            x < grid.GetWidth() 
+            && y < grid.GetHeight() 
+            && x >= 0 
+            && y >= 0
+        );
     }
 
      private void ScaleTileToGrid(GameObject tile){
+
+        // Scales the floor and wall tiles so that they fit the grid, regardless of cellSize
+
         Vector3 tileSize = tile.GetComponent<MeshFilter>().sharedMesh.bounds.size;
         tile.transform.localScale = Vector3.one * grid.GetCellSize() / tileSize.x; // Assumes floor tile is square!
      }
 
-    private void UpdateFloorTile(int x, int y) { 
-        Destroy(floor[y + grid.GetHeight() * x]);
+    public void UpdateFloorTile(int x, int y) { 
+
+        // Swaps floor tile with wall tile depending on whether that PathNode is walkable or not
+
+        UnityEngine.Object.Destroy(floor[y + grid.GetHeight() * x]);
         PathNode pathNode = grid.GetGridObject(x, y);
 
         if (pathNode.isWalkable){
-            floor[y + grid.GetHeight() * x] = Instantiate(floorTile,
+            floor[y + grid.GetHeight() * x] = UnityEngine.Object.Instantiate(floorTile,
             grid.GetCellSize() * (UPathing.XZPlane(x,y) + UPathing.XZPlane(1,1) * 0.5f),
             Quaternion.identity);
 
             floor[y + grid.GetHeight() * x].layer = LayerMask.NameToLayer("Ground");
         } else {
-            floor[y + grid.GetHeight() * x] = Instantiate(wallTile,
+            floor[y + grid.GetHeight() * x] = UnityEngine.Object.Instantiate(wallTile,
             grid.GetCellSize() * (UPathing.XZPlane(x,y) + UPathing.XZPlane(1,1) * 0.5f),
             Quaternion.identity);
         }
     }
 
     private void CreateFloor() {
+
+        // Instantiate floor tiles for each PathNode in grid when game first launches
+
         for (int x = 0; x < grid.GetWidth(); x++){
             for (int y = 0; y < grid.GetHeight(); y++){
                 PathNode pathNode = grid.GetGridObject(x, y);
 
                 if (pathNode.isWalkable){
-                    floor[y + grid.GetHeight() * x] = Instantiate(floorTile,
+                    floor[y + grid.GetHeight() * x] = UnityEngine.Object.Instantiate(floorTile,
                     grid.GetCellSize() * (UPathing.XZPlane(x,y) + UPathing.XZPlane(1,1) * 0.5f),
                     Quaternion.identity);
 
                     floor[y + grid.GetHeight() * x].layer = LayerMask.NameToLayer("Ground");
                 } else {
-                    floor[y + grid.GetHeight() * x] = Instantiate(wallTile,
+                    floor[y + grid.GetHeight() * x] = UnityEngine.Object.Instantiate(wallTile,
                     grid.GetCellSize() * (UPathing.XZPlane(x,y) + UPathing.XZPlane(1,1) * 0.5f),
                     Quaternion.identity);
                 }
             }
         }
     }
-
-    /*
-    private void UpdatePathfindingVisual() {
-        MeshUtil.CreateEmptyMeshArrays(grid.GetWidth() * grid.GetHeight(), out Vector3[] vertices, out Vector2[] uv, out int[] triangles);
-
-        for (int x = 0; x < grid.GetWidth(); x++){
-            for (int y = 0; y < grid.GetHeight(); y++){
-
-                int index = x * grid.GetHeight() + y;
-                Vector3 quadSize = new Vector3(1, 0, 1) * grid.GetCellSize();
-                float yOffset = 0.01f;
-
-                PathNode pathNode = grid.GetGridObject(x, y);
-
-                if (pathNode.isWalkable) {
-                    quadSize = Vector3.zero;
-                }
-
-                MeshUtil.AddToMeshArrays(vertices, 
-                uv, 
-                triangles, 
-                index, 
-                grid.GetWorldPosition(x, y) + quadSize * 0.5f, 
-                0f, //Rotation
-                quadSize,
-                Vector2.zero, // UV00
-                Vector2.zero, // U11
-                yOffset); // Amount that mesh is raised in y direcion i.e above the grid
-            }
-        }
-
-        mesh.vertices = vertices;
-        mesh.uv = uv;
-        mesh.triangles = triangles;
-    }
-    */
 }

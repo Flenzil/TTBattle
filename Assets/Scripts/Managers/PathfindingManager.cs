@@ -10,20 +10,18 @@ using UnityEngine.Analytics;
 
 public class PathFindingManager : MonoBehaviour {
 
-    private const float speed = 4f;
+    // Manages the pathfinding calculation, creature movement and tile highlighting
 
+    private const float moveSpeed = 4f;
 
     private int currentPathIndex;
     private List<Vector3> pathVectorList;
-    //private Grid<PathNode> grid = Pathfinding.Instance.GetGrid(); 
     private Vector3 lastMousePosition;
     private Vector3 lastObjectPosition;
     private static PathFindingManager instance;
+    private PathFindingVisual pathFindingVisual;
 
-    public List<PathNode> path;
-
-
-    [SerializeField] PathFindingVisual pathFindingVisual;
+    public List<PathNode> path; 
 
     public static PathFindingManager Instance {
         get {
@@ -33,12 +31,14 @@ public class PathFindingManager : MonoBehaviour {
         }
     }
 
-    private void Awake(){
+    private void Start(){
+        pathFindingVisual = GameManager.Instance.pathFindingVisual;
         instance = this;
     }
 
     private void Update() {
 
+        // Remove highlighted tiles if mouse is hovering over UI element
         if (EventSystem.current.IsPointerOverGameObject()){
             pathFindingVisual.UnHighlightPath(pathFindingVisual.highlightedPath);
             HandleMovement();
@@ -54,8 +54,6 @@ public class PathFindingManager : MonoBehaviour {
             Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit);
             GameObject hitObject = hit.transform.GameObject();
 
-
-
             // If the object is the active player, pathfind to ground behind it, as if the object wasn't there.
             if (hitObject.layer == LayerMask.NameToLayer("Creatures") && IsActiveCreature(hitObject)){
                 SetTargetPosition(UGame.GetMousePosition3D(Camera.main, "Ground"));
@@ -66,6 +64,14 @@ public class PathFindingManager : MonoBehaviour {
                 SetTargetPosition(hit.point);
             }
         }
+
+        if (Input.GetMouseButtonDown(3)){
+            Vector3 mousePosition = UGame.GetMousePosition3D(Camera.main, "Ground");
+
+            PathNode node = GetGrid().GetGridObject(mousePosition);
+            node.isWalkable = !node.isWalkable;
+            pathFindingVisual.UpdateFloorTile(node.x, node.y);
+        }
     }
 
     private Grid<PathNode> GetGrid() {
@@ -73,35 +79,46 @@ public class PathFindingManager : MonoBehaviour {
     }
 
     private void SetPath(int currentX, int currentY, int endX, int endY){
+        
+        // Calls the pathfinding script to calculate path from (currentX, currentY)
+        // to (endX, endY)
+
         path = Pathfinding.Instance.FindPath(currentX, currentY, endX, endY);
     }
 
     private void SetPath(Vector3 startPosition, Vector3 endPosition){
+
+        // Overload for SetPath that accepts world position instead of grid position
+
         List<Vector3> vectorPath = Pathfinding.Instance.FindPath(startPosition, endPosition);
         if (vectorPath != null){
             path = Vector3ListToPathNodeList(vectorPath);
         } 
     }
 
-    public void SetPath(List<Vector3> vectorPath){
-        if (vectorPath != null){
-            path = Vector3ListToPathNodeList(vectorPath);
-        }
-    }
-
     private void HighLightPath(){
+
+        // Each time the mouse hovers over a new tile in the grid or the active creature moves, 
+        //the pathfinding is called and the resulting path is used to highlight the tiles that 
+        // make up the path. The actual highlighting is done in PathfindingVisual.cs.
+
+        // Can't pathfind if there's no creature selected
         if (UGame.GetActiveCreature() == null){
             return;
         }
-        if (!IsMouseOverNewGridNode() && !ObjectHasMoved()) {
+
+        // Don't highlight if nothing has changed
+        if (!IsMouseOverNewGridNode() && !HasCreatureMoved()) {
             return;
         }
 
         Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit);
-
         GetGrid().GetXY(GetPosition(UGame.GetActiveCreature()), out int currentX, out int currentY);
 
         int endX, endY;
+
+        // Allow player to click through the active creature so that they can pathfind to a space
+        // behind it.
         if (IsActiveCreature(hit.transform.GameObject())) {
             GetGrid().GetXY(UGame.GetMousePosition3D(Camera.main, "Ground"), out endX, out endY);
         } else {
@@ -111,18 +128,31 @@ public class PathFindingManager : MonoBehaviour {
         if (!IsInsideGrid(endX, endY)) {
             return;
         }
-        if (hit.transform.GameObject().layer == LayerMask.NameToLayer("Creatures") && !IsActiveCreature(hit.transform.GameObject())) {
+
+        // If the mouse is hovering over another creature, then set the pathfiding destination
+        // to the anchor point of that creature.
+        if (
+            hit.transform.GameObject().layer == LayerMask.NameToLayer("Creatures") 
+            && !IsActiveCreature(hit.transform.GameObject())
+        ) {
             GetGrid().GetXY(GetPosition(hit.transform.GameObject()), out endX, out endY);
         }
 
+        // Find path to endX, endY
         SetPath(currentX, currentY, endX, endY);
 
+        // Update highlighted tiles
         pathFindingVisual.SetPath(path);
         pathFindingVisual.TileHighlighting();
     }
 
 
     private Vector3 GetPosition(GameObject player){
+
+        // Pathfinding for creatures is based on an anchor game object which is a child
+        // of the creature object, so return the position of that instead of the position
+        // of the creature
+
         if (player.transform.childCount == 0) {
             return player.transform.position;
         } else {
@@ -131,38 +161,59 @@ public class PathFindingManager : MonoBehaviour {
     }
 
     private bool IsMouseOverNewGridNode(){
-        if (GetGrid().GetGridObject(UGame.GetMousePosition3D(Camera.main)) != GetGrid().GetGridObject(lastMousePosition)){
+
+        // Check if mouse has moved over a new tile to avoid unnecessary pathfinding
+
+        if (
+            GetGrid().GetGridObject(UGame.GetMousePosition3D(Camera.main)) 
+            != GetGrid().GetGridObject(lastMousePosition)
+        ){
             lastMousePosition = UGame.GetMousePosition3D(Camera.main);
-            return true;
-        } else return false;
-    }
-
-    private bool ObjectHasMoved(){
-        if (UGame.GetActiveCreature().transform.position != lastObjectPosition){
-            lastObjectPosition = UGame.GetActiveCreature().transform.position;
-            return true;
-        } else return false;
-    }
-
-    private bool IsInsideGrid(int x, int y){
-        if (x < GetGrid().GetWidth() && y < GetGrid().GetHeight() && x >= 0 && y >= 0){
             return true;
         } else {
             return false;
         }
     }
+
+    private bool HasCreatureMoved(){
+
+        // Check if the active creature has moved to update highlighted tiles as it
+        // travels along its path
+
+        if (UGame.GetActiveCreature().transform.position != lastObjectPosition){
+            lastObjectPosition = UGame.GetActiveCreature().transform.position;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private bool IsInsideGrid(int x, int y){
+        return (
+            x < GetGrid().GetWidth() 
+            && y < GetGrid().GetHeight() 
+            && x >= 0 
+            && y >= 0
+        );
+    }
     private bool IsActiveCreature(GameObject creature){
-        if (creature == UGame.GetActiveCreature()) return true;
-        return false;
+        return creature == UGame.GetActiveCreature();
     }
     
     private void HandleMovement() {
+
+        // Move the active creature towards the next pathNode in the path.
+        // When sufficiently close, move on to the next pathNode until the
+        // creature is at the end of the path.
+
         if (pathVectorList != null) {
             Vector3 targetPosition = pathVectorList[currentPathIndex];
             if (Vector3.Distance(GetPosition(), targetPosition) > 0.05f) {
-                Vector3 moveDir = (targetPosition - GetPosition()).normalized;
+                Vector3 moveDirection = (targetPosition - GetPosition()).normalized;
 
-                UGame.GetActiveCreature().transform.position = UGame.GetActiveCreature().transform.position + moveDir * speed * Time.deltaTime;
+                UGame.GetActiveCreature().transform.position 
+                    += moveSpeed * Time.deltaTime * moveDirection;
+
             } else {
                 currentPathIndex++;
                 if (currentPathIndex >= pathVectorList.Count) {
@@ -177,12 +228,17 @@ public class PathFindingManager : MonoBehaviour {
     }
 
     private void SetSpaceToOccupied(PathNode positionNode, GameObject creature){
-        Grid<PathNode> grid = Pathfinding.Instance.GetGrid();
+        
+        // Set every pathNode in creature's space to occupied
 
+        Grid<PathNode> grid = Pathfinding.Instance.GetGrid();
         UPathing.SetCreatureSpaceToOccupied(creature, grid, positionNode.x, positionNode.y);
     }
 
     private void ClearCreatureSpace(GameObject creature){
+
+        // Set every pathNode in creature's space to unoccupied
+
         Grid<PathNode> grid = Pathfinding.Instance.GetGrid();
         GameObject anchor = creature.transform.GetChild(0).GameObject();
         grid.GetXY(anchor.transform.position, out int x, out int y);
@@ -197,12 +253,15 @@ public class PathFindingManager : MonoBehaviour {
 
     private List<Vector3> PathNodeListToVector3List(List<PathNode> pathNodeList){
 
+        // Convert list of pathNode to list of Vector3
+        
         List<Vector3> vector3List = new();
         float cellSize = Pathfinding.Instance.GetGrid().GetCellSize();
+
         foreach(PathNode node in pathNodeList){
             vector3List.Add(
                 GetGrid().GetWorldPosition(node.x, node.y) 
-                + UPathing.XZPlane(cellSize, cellSize) * 0.5f
+                + UPathing.XZPlane(cellSize, cellSize) * 0.5f // Offset to middle of tile
             );
         }
         return vector3List;
@@ -210,8 +269,9 @@ public class PathFindingManager : MonoBehaviour {
 
     private List<PathNode> Vector3ListToPathNodeList(List<Vector3> vectorList){
 
+        // Convert list of PathNode to list of Vector3
+
         List<PathNode> pathNodeList = new();
-        float cellSize = Pathfinding.Instance.GetGrid().GetCellSize();
         foreach(Vector3 position in vectorList){
             GetGrid().GetXY(position, out int x, out int y);
             pathNodeList.Add(
@@ -223,32 +283,13 @@ public class PathFindingManager : MonoBehaviour {
 
     public void SetTargetPosition(Vector3 targetPosition) {
 
+        // Sets the target position for the pathfinding. Also sets the pathNodes
+        // at the creature's current position to unoccupied, sets the pathNodes
+        // at the target position to occupied and updates the highlighting.
+
         currentPathIndex = 0;
 
         SetPath(GetPosition(), targetPosition);
-
-        if (path != null && path.Count > 1) {
-
-            path.RemoveAt(0);
-
-            if (path != null) {
-                ClearCreatureSpace(UGame.GetActiveCreature());
-                SetSpaceToOccupied(path.Last(), UGame.GetActiveCreature());
-                pathFindingVisual.SetPath(path);
-                pathFindingVisual.TileHighlighting();
-                pathVectorList = PathNodeListToVector3List(path);
-                }
-        }
-    }
-
-    public void SetTargetPosition(List<Vector3> vectorPath) {
-
-        currentPathIndex = 0;
-
-        //SetPath(GetPosition(), targetPosition);
-        if (path != null){
-            path = Vector3ListToPathNodeList(vectorPath);
-        }
 
         if (path != null && path.Count > 1) {
 

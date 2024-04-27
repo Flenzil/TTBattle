@@ -3,15 +3,17 @@ using PathingUtils;
 using GameUtils;
 using UnityEngine;
 using System;
+using System.IO;
 
 public class GameManager : MonoBehaviour {
 
     private Pathfinding pathfinding;
-    [SerializeField] private PathFindingVisual pathFindingVisual;
+    //[SerializeField] private PathFindingVisual pathFindingVisual;
     [SerializeField] GameObject floorTile;
     [SerializeField] GameObject wallTile;
     [SerializeField] List<GameObject> creatures;
 
+    public PathFindingVisual pathFindingVisual;
     public int floorWidth = 15;
     public int floorHeight = 15;
     public float cellSize = 1f;
@@ -30,6 +32,7 @@ public class GameManager : MonoBehaviour {
         instance = this;
 
         pathfinding = new Pathfinding(floorWidth, floorHeight, cellSize);
+        pathFindingVisual = new PathFindingVisual();
         if (visualiseGrid){
             pathFindingVisual.SetFloorTile(floorTile);
             pathFindingVisual.SetWallTile(wallTile);

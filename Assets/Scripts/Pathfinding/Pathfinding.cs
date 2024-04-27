@@ -10,6 +10,11 @@ using System.Linq;
 
 public class Pathfinding {
 
+    // Implements a* pathfinding while also making sure creatures can/can't pass through
+    // eachother's spaces in the appropriate situations, creatures do/don't cut corners
+    // through occupied spaces and move only as much as they need to in order to get their 
+    // target within range of their attack. 
+
     private const int MOVE_STRAIGHT_COST = 10;
     private const int MOVE_DIAGONAL_COST = 14;
 
@@ -473,11 +478,12 @@ public class Pathfinding {
 
         // Avoids the null reference exceptions of chosing an x and y positin that doesn't exist.
 
-        if (x < grid.GetWidth() && y < grid.GetHeight() && x >= 0 && y >= 0){
-            return true;
-        } else {
-            return false;
-        }
+        return (
+            x < grid.GetWidth() 
+            && y < grid.GetHeight() 
+            && x >= 0 
+            && y >= 0
+        );
     }
 
     private List<PathNode> GetNeighbourList(PathNode currentNode) {
