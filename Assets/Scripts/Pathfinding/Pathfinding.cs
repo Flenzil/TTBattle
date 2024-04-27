@@ -22,6 +22,7 @@ public class Pathfinding {
     private Grid<PathNode> grid;
     private List<PathNode> openList;
     private List<PathNode> closedList;
+    private bool isAttacking;
 
     public Pathfinding(int width, int height, float cellSize) 
     {
@@ -38,12 +39,14 @@ public class Pathfinding {
         return grid;
     }
 
-    public List<Vector3> FindPath(Vector3 startWorldPosition, Vector3 endWorldPosition) {
+    public List<Vector3> FindPath(Vector3 startWorldPosition, Vector3 endWorldPosition, bool isAttacking) {
 
         // Finds path from startWorldPosition to endWorldPosition using a* pathfinding. 
         // Path length equates to how many grid spaces the path takes. Essentially calls the 
         // overload FindPath which returns a list of PathNodes and converts to 
         // Vector3.
+
+        this.isAttacking = isAttacking;
 
         grid.GetXY(startWorldPosition , out int startX, out int startY);
         grid.GetXY(endWorldPosition, out int endX, out int endY);
@@ -52,7 +55,7 @@ public class Pathfinding {
 
         // Don't path outside grid
         if (IsInsideGrid(endX, endY)){
-            path = FindPath(startX, startY, endX, endY);
+            path = FindPath(startX, startY, endX, endY, isAttacking);
         } else {
              return null;
         }
@@ -69,10 +72,12 @@ public class Pathfinding {
         return vectorPath;
     }
 
-    public List<PathNode> FindPath(int startX, int startY, int endX, int endY){
+    public List<PathNode> FindPath(int startX, int startY, int endX, int endY, bool isAttacking){
 
         // Finds path from grid position (startX, startY) to (endX, endY) as a 
         // list of PathNodes using a* pathfinding.
+
+        this.isAttacking = isAttacking;
 
         PathNode startNode = GetNode(startX, startY);
         PathNode endNode = GetNode(endX, endY);
@@ -156,7 +161,6 @@ public class Pathfinding {
                     closedList.Add(currentNode);
                     continue;
                 }
-
 
                 if (IsCreatureSpaceInAdjacentCreatureSpace(UGame.GetActiveCreature(), neighborNode, occupiedByAdjacentCreature)){
                     closedList.Add(currentNode);
@@ -322,11 +326,7 @@ public class Pathfinding {
         int targetSeekRadiusEnd = 0;
 
         // Only give non-zero value to the above variables if the active creature is attacking
-        if (
-            UGame.GetActiveAttack() != null
-            && endNode.isOccupied
-            && endNode.GetOccupyingCreature() != UGame.GetActiveCreature()
-        ){
+        if (isAttacking){
             UPathing.GetSeekRadius(
                 endNode.GetOccupyingCreature().GetComponent<CreatureStats>().GetSize(),
                 out targetSeekRadiusStart, 
@@ -335,12 +335,13 @@ public class Pathfinding {
             weaponRange = UGame.GetActiveAttack().GetWeaponRange() / 5;
         }
 
-        int seekRadiusStart = attackerSeekRadiusStart - targetSeekRadiusStart - weaponRange;
-        int seekRadiusEnd = attackerSeekRadiusEnd + targetSeekRadiusEnd + weaponRange;
+        int seekRadiusStart = attackerSeekRadiusStart - weaponRange - targetSeekRadiusEnd;
+        int seekRadiusEnd = attackerSeekRadiusEnd + weaponRange + targetSeekRadiusStart;
+
 
         for (int i = seekRadiusStart; i <= seekRadiusEnd; i++){
             for (int j = seekRadiusStart; j <= seekRadiusEnd; j++){
-                if (GetNode(endNode.x + i, endNode.y + j) == currentNode) {
+                if (GetNode(currentNode.x + i, currentNode.y + j) == endNode ) {
                     return true;
                 }
             }

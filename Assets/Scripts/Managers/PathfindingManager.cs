@@ -56,12 +56,12 @@ public class PathFindingManager : MonoBehaviour {
 
             // If the object is the active player, pathfind to ground behind it, as if the object wasn't there.
             if (hitObject.layer == LayerMask.NameToLayer("Creatures") && IsActiveCreature(hitObject)){
-                SetTargetPosition(UGame.GetMousePosition3D(Camera.main, "Ground"));
+                SetTargetPosition(UGame.GetMousePosition3D(Camera.main, "Ground"), false);
             }
 
             // If the object is the ground, pathfind to that point
             if (hitObject.layer == LayerMask.NameToLayer("Ground")){
-                SetTargetPosition(hit.point);
+                SetTargetPosition(hit.point, false);
             }
         }
 
@@ -74,23 +74,47 @@ public class PathFindingManager : MonoBehaviour {
         }
     }
 
+    public void SetTargetPosition(Vector3 targetPosition, bool isAttacking) {
+
+        // Sets the target position for the pathfinding. Also sets the pathNodes
+        // at the creature's current position to unoccupied, sets the pathNodes
+        // at the target position to occupied and updates the highlighting.
+
+        currentPathIndex = 0;
+
+        SetPath(GetPosition(), targetPosition, isAttacking);
+
+        if (path != null && path.Count > 1) {
+
+            path.RemoveAt(0);
+
+            if (path != null) {
+                ClearCreatureSpace(UGame.GetActiveCreature());
+                SetSpaceToOccupied(path.Last(), UGame.GetActiveCreature());
+                pathFindingVisual.SetPath(path);
+                pathFindingVisual.TileHighlighting();
+                pathVectorList = PathNodeListToVector3List(path);
+                }
+        }
+    }
+
     private Grid<PathNode> GetGrid() {
         return Pathfinding.Instance.GetGrid();
     }
 
-    private void SetPath(int currentX, int currentY, int endX, int endY){
+    private void SetPath(int currentX, int currentY, int endX, int endY, bool isAttacking){
         
         // Calls the pathfinding script to calculate path from (currentX, currentY)
         // to (endX, endY)
 
-        path = Pathfinding.Instance.FindPath(currentX, currentY, endX, endY);
+        path = Pathfinding.Instance.FindPath(currentX, currentY, endX, endY, isAttacking);
     }
 
-    private void SetPath(Vector3 startPosition, Vector3 endPosition){
+    private void SetPath(Vector3 startPosition, Vector3 endPosition, bool isAttacking){
 
         // Overload for SetPath that accepts world position instead of grid position
 
-        List<Vector3> vectorPath = Pathfinding.Instance.FindPath(startPosition, endPosition);
+        List<Vector3> vectorPath = Pathfinding.Instance.FindPath(startPosition, endPosition, isAttacking);
         if (vectorPath != null){
             path = Vector3ListToPathNodeList(vectorPath);
         } 
@@ -131,15 +155,17 @@ public class PathFindingManager : MonoBehaviour {
 
         // If the mouse is hovering over another creature, then set the pathfiding destination
         // to the anchor point of that creature.
+        bool isAttacking = false;
         if (
             hit.transform.GameObject().layer == LayerMask.NameToLayer("Creatures") 
             && !IsActiveCreature(hit.transform.GameObject())
         ) {
+            isAttacking = true;
             GetGrid().GetXY(GetPosition(hit.transform.GameObject()), out endX, out endY);
         }
 
         // Find path to endX, endY
-        SetPath(currentX, currentY, endX, endY);
+        SetPath(currentX, currentY, endX, endY, isAttacking);
 
         // Update highlighted tiles
         pathFindingVisual.SetPath(path);
@@ -281,27 +307,4 @@ public class PathFindingManager : MonoBehaviour {
         return pathNodeList;
     }
 
-    public void SetTargetPosition(Vector3 targetPosition) {
-
-        // Sets the target position for the pathfinding. Also sets the pathNodes
-        // at the creature's current position to unoccupied, sets the pathNodes
-        // at the target position to occupied and updates the highlighting.
-
-        currentPathIndex = 0;
-
-        SetPath(GetPosition(), targetPosition);
-
-        if (path != null && path.Count > 1) {
-
-            path.RemoveAt(0);
-
-            if (path != null) {
-                ClearCreatureSpace(UGame.GetActiveCreature());
-                SetSpaceToOccupied(path.Last(), UGame.GetActiveCreature());
-                pathFindingVisual.SetPath(path);
-                pathFindingVisual.TileHighlighting();
-                pathVectorList = PathNodeListToVector3List(path);
-                }
-        }
-    }
 }

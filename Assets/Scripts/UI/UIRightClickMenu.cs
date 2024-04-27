@@ -48,7 +48,7 @@ public class RightClickMenu : MonoBehaviour
             AddContainer(mouseScreenPosition);
 
             AddButton("Move Here", () => {
-                PathFindingManager.Instance.SetTargetPosition(mousePosition);
+                PathFindingManager.Instance.SetTargetPosition(mousePosition, false);
                 }
             );
 

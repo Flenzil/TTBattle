@@ -107,12 +107,6 @@ public class CombatManager : MonoBehaviour
     }
 
     private void PathToTarget(GameObject target){
-        /*
-        List<Vector3> path = Pathfinding.Instance.FindPath(UGame.GetActiveCreaturePosition(), target.transform.GetChild(0).transform.position);
-        if (path.Count * 5 >= UGame.GetActiveAttack().GetWeaponRange()){
-            PathFindingManager.Instance.SetTargetPosition(path);
-        }
-        */
-        PathFindingManager.Instance.SetTargetPosition(target.transform.GetChild(0).transform.position);
+        PathFindingManager.Instance.SetTargetPosition(target.transform.GetChild(0).transform.position, true);
     }
 }
