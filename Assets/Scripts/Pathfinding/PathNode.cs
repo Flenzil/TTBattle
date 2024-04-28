@@ -16,8 +16,7 @@ public class PathNode
 
     public bool isWalkable;
     public bool isOccupied = false;
-    //public string occupiedBy = "none";
-    //public string occupiedBySize = "none";
+    public bool isDifficultTerrain = false;
     private GameObject occupyingCreature = null;
 
     public PathNode cameFromNode;
@@ -42,35 +41,17 @@ public class PathNode
         return isWalkable;
     }
 
-    /*
-    public void SetOccupiedState(string occupiedBy){
-        this.occupiedBy = occupiedBy;
-        grid.TriggerGridObjectChanged(x, y);
-    }
-
-    public string GetOccupiedState(){
-        return occupiedBy;
-    }
-
-    public void SetOccupiedSize(string creatureSize){
-        this.occupiedBySize = creatureSize;
-        grid.TriggerGridObjectChanged(x, y);
-    }
-
-    public string GetOccupiedSize(){
-        return occupiedBySize;
-    }
-    */
-
     public void SetOccupyingCreature(GameObject creature){
         this.occupyingCreature = creature;
         isOccupied = true;
+        isDifficultTerrain = true;
         grid.TriggerGridObjectChanged(x, y);
     }
 
     public void ClearOccupyingCreature(){
         this.occupyingCreature = null;
         isOccupied = false;
+        isDifficultTerrain = false;
         grid.TriggerGridObjectChanged(x, y);
     }
 

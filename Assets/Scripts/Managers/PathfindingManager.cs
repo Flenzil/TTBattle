@@ -7,6 +7,7 @@ using System.Linq;
 using GameUtils;
 using System.Collections;
 using UnityEngine.Analytics;
+using Unity.Collections;
 
 public class PathFindingManager : MonoBehaviour {
 
@@ -118,8 +119,14 @@ public class PathFindingManager : MonoBehaviour {
                     += moveSpeed * Time.deltaTime * moveDirection;
 
             } else {
-                currentPathIndex++;
+                
+                GetGrid().GetXY(pathVectorList[currentPathIndex], out int x, out int y);
                 UGame.GetActiveCreatureStats().DecreaseRemainingMovement(5);
+                if (IsDifficultTerrain(x, y)){
+                    UGame.GetActiveCreatureStats().DecreaseRemainingMovement(5);
+                }
+
+                currentPathIndex++;
                 
                 if (
                     currentPathIndex >= pathVectorList.Count
@@ -129,6 +136,10 @@ public class PathFindingManager : MonoBehaviour {
                 }
             }
         } 
+    }
+
+    private bool IsDifficultTerrain(int x, int y){
+        return GetGrid().GetGridObject(x, y).isDifficultTerrain;
     }
 
     private void StopMoving() {

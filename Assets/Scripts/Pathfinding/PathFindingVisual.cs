@@ -7,6 +7,8 @@ using System.Linq;
 using System;
 using GameUtils;
 using UnityEngine.EventSystems;
+using Mono.Cecil;
+using CreatureUtils;
 
 public class PathFindingVisual{
 
@@ -89,38 +91,55 @@ public class PathFindingVisual{
 
         // Highlights all PathNodes in path and highlights surrounding tiles for creatures that are larger
         // than 1 tile wide.
+        int remainingMovement = UGame.GetActiveCreatureStats().GetRemainingMovement() / 5;
+        Debug.Log(remainingMovement);
 
         for (int i = 1; i < path.Count(); i++){
             PathNode node = path[i];
-            int speed = UGame.GetActiveCreatureStats().GetRemainingMovement();
-            grid.GetXY(UGame.GetActiveCreature().transform.position, out int ObjectX, out int ObjectY);
+
+            grid.GetXY(
+                UGame.GetActiveCreature().transform.position,
+                out int destinationX,
+                out int destinationY
+            );
 
             Color colour;
 
-            UPathing.GetSeekRadius(UGame.GetActiveCreatureSize(), out int pathStart, out int pathEnd);
-            for (int j = pathStart; j <= pathEnd; j++){
-                for (int k = pathStart; k <= pathEnd; k++) {
+            UPathing.GetSeekRadius(UGame.GetActiveCreatureSize(), out int seekRadiusStart, out int seekRadiusEnd);
+            for (int j = seekRadiusStart; j <= seekRadiusEnd; j++){
+                for (int k = seekRadiusStart; k <= seekRadiusEnd; k++) {
                     if (
                         !IsInsideGrid(node.x + j, node.y + k) 
-                        || (node.isOccupied && node.GetOccupyingCreature() != UGame.GetActiveCreature())
+                        || grid.GetGridObject(node.x + j, node.y + k).GetOccupyingCreature() == UGame.GetActiveCreature()
                     ) {
                         continue;
                     }
+                    Debug.Log(remainingMovement);
 
+                    grid.GetXY(UGame.GetActiveCreature().transform.GetChild(0).position, out int x, out int y);
                     // Colour tiles beyond the creature's walking speed red.
-                    if (
-                        Math.Abs(ObjectX - (node.x + j)) + pathStart  > speed / 5.0f 
-                        || Math.Abs(ObjectY - (node.y + k)) + pathStart > speed / 5.0f
-                    ){
+                    int offset = 0;
+                    if ( node.x < x || node.y < y) {
+                        offset = -seekRadiusStart;
+                    } else if (node.x > x || node.y > y) {
+                        offset = seekRadiusEnd;
+                    }
+                    if ( remainingMovement + offset <= 0){
                         colour = Color.red;
                     } 
                     else {
                         colour = Color.yellow;
                     }
 
-                    HighlightTile(node.x + j, node.y + k, colour);
+                    if (!highlightedPath.Contains(grid.GetGridObject(node.x + j, node.y + k))){
+                        HighlightTile(node.x + j, node.y + k, colour);
+                    }
                     highlightedPath.Add(grid.GetGridObject(node.x + j, node.y + k));
                 }
+            }
+            remainingMovement--;
+            if (node.isDifficultTerrain){
+                remainingMovement--;
             }
         }
     }
@@ -144,6 +163,22 @@ public class PathFindingVisual{
             UnHighlightTile(pathToUnHighlight[i].x, pathToUnHighlight[i].y);
             pathToUnHighlight.RemoveAt(i);
         }
+    }
+
+    private int MovementNeededToTraversePath(List<PathNode> path){
+
+        // Some tiles can be difficult terrain and thus cost twice as much
+        // movement to path through. This returns the amount of "effective"
+        // tiles are needed to path.
+
+        int movementNeeded = 0;
+        foreach (PathNode node in path){
+            movementNeeded++;
+            if (node.isDifficultTerrain){
+                movementNeeded++;
+            }
+        }
+        return movementNeeded;
     }
 
     private bool IsInsideGrid(int x, int y){
