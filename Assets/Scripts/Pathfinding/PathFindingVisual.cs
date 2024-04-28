@@ -9,6 +9,7 @@ using GameUtils;
 using UnityEngine.EventSystems;
 using Mono.Cecil;
 using CreatureUtils;
+using TMPro;
 
 public class PathFindingVisual{
 
@@ -92,9 +93,10 @@ public class PathFindingVisual{
         // Highlights all PathNodes in path and highlights surrounding tiles for creatures that are larger
         // than 1 tile wide.
         int remainingMovement = UGame.GetActiveCreatureStats().GetRemainingMovement() / 5;
-        Debug.Log(remainingMovement);
+        bool passedThroughDifficultTerrain;
 
         for (int i = 1; i < path.Count(); i++){
+            passedThroughDifficultTerrain = false;
             PathNode node = path[i];
 
             grid.GetXY(
@@ -114,17 +116,20 @@ public class PathFindingVisual{
                     ) {
                         continue;
                     }
-                    Debug.Log(remainingMovement);
 
                     grid.GetXY(UGame.GetActiveCreature().transform.GetChild(0).position, out int x, out int y);
-                    // Colour tiles beyond the creature's walking speed red.
+                    // Colour tiles beyond the creature's walking speed red. "offset" takes into account the 
+                    // width of the creature
                     int offset = 0;
                     if ( node.x < x || node.y < y) {
                         offset = -seekRadiusStart;
                     } else if (node.x > x || node.y > y) {
                         offset = seekRadiusEnd;
                     }
-                    if ( remainingMovement + offset <= 0){
+                    if (
+                         remainingMovement + offset <= 0
+                         || remainingMovement == 0
+                         ){
                         colour = Color.red;
                     } 
                     else {
@@ -134,11 +139,17 @@ public class PathFindingVisual{
                     if (!highlightedPath.Contains(grid.GetGridObject(node.x + j, node.y + k))){
                         HighlightTile(node.x + j, node.y + k, colour);
                     }
+
                     highlightedPath.Add(grid.GetGridObject(node.x + j, node.y + k));
+
+                    if (grid.GetGridObject(node.x + j, node.y + k).isDifficultTerrain){
+                        passedThroughDifficultTerrain = true;
+                    }
+                    
                 }
             }
             remainingMovement--;
-            if (node.isDifficultTerrain){
+            if (passedThroughDifficultTerrain){
                 remainingMovement--;
             }
         }

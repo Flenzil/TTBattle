@@ -39,6 +39,7 @@ public class PathFindingManager : MonoBehaviour {
 
     private void Update() {
 
+
         // Remove highlighted tiles if mouse is hovering over UI element
         if (EventSystem.current.IsPointerOverGameObject()){
             pathFindingVisual.UnHighlightPath(pathFindingVisual.highlightedPath);
@@ -51,6 +52,11 @@ public class PathFindingManager : MonoBehaviour {
         HandleMovement();
 
         if (Input.GetMouseButtonDown(0)) {
+
+            if (UGame.GetActiveCreatureStats().GetRemainingMovement() == 0){
+                Debug.Log("Out of movement!");
+                return;
+            }
 
             // Find object under mouse position
             Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit);

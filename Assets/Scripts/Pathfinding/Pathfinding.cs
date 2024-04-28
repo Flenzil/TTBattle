@@ -7,6 +7,7 @@ using CreatureUtils;
 using UnityEditor.Experimental.GraphView;
 using System.IO;
 using System.Linq;
+using System.Data.Common;
 
 public class Pathfinding {
 
@@ -140,6 +141,7 @@ public class Pathfinding {
 
         while (openList.Count > 0) {
             PathNode currentNode = GetLowestFCostNode(openList);
+            int difficultTerrainMod = 1;
 
             // Exit point for while loop
             if (
@@ -182,7 +184,13 @@ public class Pathfinding {
                     continue;
                 }
 
-                int neighborGCost = currentNode.gCost + CalculateDistanceCost(currentNode, neighborNode);
+                // Difficult terrain costs twice as much movement, which is reflected in the gCost.
+                if (IsAnyPartOfCreatureSpaceDifficultTerrain(currentNode)){
+                    difficultTerrainMod = 2;
+                }
+                Debug.Log(difficultTerrainMod);
+
+                int neighborGCost = currentNode.gCost + difficultTerrainMod * CalculateDistanceCost(currentNode, neighborNode);
                 if (neighborGCost < neighborNode.gCost) {
                     neighborNode.cameFromNode = currentNode;
                     neighborNode.gCost = neighborGCost;
@@ -200,6 +208,31 @@ public class Pathfinding {
         return null;
     }
 
+    private bool IsAnyPartOfCreatureSpaceDifficultTerrain(PathNode node){
+
+        // Checks if a mutli-tile creature is on a tile of difficult terrain
+
+        UPathing.GetSeekRadius(
+            UGame.GetActiveCreatureSize(),
+            out int seekRadiusStart,
+            out int seekRadiusEnd
+            );
+        
+        
+        for (int i = seekRadiusStart; i <= seekRadiusEnd; i++){
+            for (int j = seekRadiusStart; j <= seekRadiusEnd; j++){
+                if (GetNode(node.x + i, node.y + j).GetOccupyingCreature() == UGame.GetActiveCreature()){
+                    continue;
+                }
+                if (GetNode(node.x + i, node.y + j).isDifficultTerrain){
+                    return true;
+                }
+            }
+
+        }
+        return false;
+    }
+
     private int CalculateDistanceCost(PathNode a, PathNode b) {
 
         // Calulcates the hCost from a to b for use in the a* pathfinding.
@@ -207,6 +240,7 @@ public class Pathfinding {
         int xDistance = Mathf.Abs(a.x - b.x);
         int yDistance = Mathf.Abs(a.y - b.y);
         int remaining = Mathf.Abs(xDistance - yDistance);
+
         return MOVE_DIAGONAL_COST * Mathf.Min(xDistance, yDistance) + MOVE_STRAIGHT_COST * remaining;
     }
 
@@ -531,11 +565,21 @@ public class Pathfinding {
 
         while (
             path != null
-            && path.Count != 0
             && IsAnyPartOfCreatureSpaceOccupied(UGame.GetActiveCreature(), path.Last().x, path.Last().y) 
-            ){
-                path = CutOccupiedSpaceFromPath(path);
-            }
+        ){
+            path = CutOccupiedSpaceFromPath(path);
+        }
+
+        int remainingMovement = UGame.GetActiveCreatureStats().GetRemainingMovement() / 5;
+        if (path.Count() > remainingMovement + 1){
+            if (path[remainingMovement + 1].isOccupied){
+                for (int i = remainingMovement; i < path.Count(); i++){
+                    path.RemoveAt(i);
+                }
+            } 
+        }
+
+
         return path;
     }
 

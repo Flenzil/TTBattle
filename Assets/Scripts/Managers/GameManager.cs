@@ -88,7 +88,7 @@ public class GameManager : MonoBehaviour {
 
             Vector3 creaturePosition = GetPosition(creatureObject);
 
-            //creatureObject.transform.Translate(distance);
+            creatureObject.transform.Translate(distanceToAnchor);
 
             
             pathfinding.GetGrid().GetXY(GetPosition(creatureObject), out int x, out int y);
