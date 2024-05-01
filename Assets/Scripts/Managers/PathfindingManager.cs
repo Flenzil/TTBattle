@@ -167,8 +167,8 @@ public class PathFindingManager : MonoBehaviour {
         pathVectorList = null;
     }
 
-    private Grid<PathNode> GetGrid() {
-        return Pathfinding.Instance.GetGrid();
+    public static Grid<PathNode> GetGrid() {
+        return Pathfinding.GetGrid();
     }
 
     private void SetPath(int currentX, int currentY, int endX, int endY, bool isAttacking){
@@ -300,7 +300,7 @@ public class PathFindingManager : MonoBehaviour {
         
         // Set every pathNode in creature's space to occupied
 
-        Grid<PathNode> grid = Pathfinding.Instance.GetGrid();
+        Grid<PathNode> grid = GetGrid();
         UPathing.SetCreatureSpaceToOccupied(creature, grid, positionNode.x, positionNode.y);
     }
 
@@ -308,7 +308,7 @@ public class PathFindingManager : MonoBehaviour {
 
         // Set every pathNode in creature's space to unoccupied
 
-        Grid<PathNode> grid = Pathfinding.Instance.GetGrid();
+        Grid<PathNode> grid = GetGrid();
         GameObject anchor = creature.transform.GetChild(0).GameObject();
         grid.GetXY(anchor.transform.position, out int x, out int y);
 
@@ -325,7 +325,7 @@ public class PathFindingManager : MonoBehaviour {
         // Convert list of pathNode to list of Vector3
         
         List<Vector3> vector3List = new();
-        float cellSize = Pathfinding.Instance.GetGrid().GetCellSize();
+        float cellSize = GetGrid().GetCellSize();
 
         foreach(PathNode node in pathNodeList){
             vector3List.Add(

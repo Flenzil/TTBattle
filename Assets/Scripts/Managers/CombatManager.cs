@@ -5,10 +5,12 @@ using GameUtils;
 using Unity.VisualScripting;
 using System;
 using System.Collections.Generic;
+using PathingUtils;
 
 public class CombatManager : MonoBehaviour
 {
     private static CombatManager instance;
+    public static int dieRoll;
 
     // Start is called before the first frame update
     void Start()
@@ -76,7 +78,7 @@ public class CombatManager : MonoBehaviour
         string name = target.name;
 
 
-        int dieRoll = UCombat.RollDice(Die.d20);
+        dieRoll = UCombat.RollDice(Die.d20);
 
         if (dieRoll == 20){
             damage = diceDamage + attack.GetDamageRoll() + modifierDamage;
@@ -93,6 +95,12 @@ public class CombatManager : MonoBehaviour
             Debug.Log($"{attacker} misses {name} with {weapon}!");
         }
         Debug.Log($"{name} is now on {target.GetComponent<Health>().GetCurrentHP()} HP");
+
+        if (target.GetComponent<Health>().GetCurrentHP() <= 0){
+
+            UPathing.SetCreatureSpaceToUnoccupied(target, Pathfinding.GetGrid());
+            target.GetComponent<Shatter>().Kill(target.GetComponent<Health>().GetCurrentHP());
+        }
     }
 
     private int AbilityModifier(int abilityScore){

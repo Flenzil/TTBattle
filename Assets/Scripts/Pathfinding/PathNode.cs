@@ -42,14 +42,14 @@ public class PathNode
     }
 
     public void SetOccupyingCreature(GameObject creature){
-        this.occupyingCreature = creature;
+        occupyingCreature = creature;
         isOccupied = true;
         isDifficultTerrain = true;
         grid.TriggerGridObjectChanged(x, y);
     }
 
     public void ClearOccupyingCreature(){
-        this.occupyingCreature = null;
+        occupyingCreature = null;
         isOccupied = false;
         isDifficultTerrain = false;
         grid.TriggerGridObjectChanged(x, y);

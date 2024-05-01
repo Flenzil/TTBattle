@@ -36,7 +36,7 @@ public class GameManager : MonoBehaviour {
         if (visualiseGrid){
             pathFindingVisual.SetFloorTile(floorTile);
             pathFindingVisual.SetWallTile(wallTile);
-            pathFindingVisual.SetGrid(pathfinding.GetGrid());
+            pathFindingVisual.SetGrid(Pathfinding.GetGrid());
         }
 
         //states state = states.idle;
@@ -68,7 +68,7 @@ public class GameManager : MonoBehaviour {
             int creatureLocX = random.Next(1, floorWidth - 1);
             int creatureLocY = random.Next(1, floorHeight - 1);
 
-            while (pathfinding.GetGrid().GetGridObject(random.Next(0,floorWidth), random.Next(0, floorHeight)).isOccupied){
+            while (Pathfinding.GetGrid().GetGridObject(random.Next(0,floorWidth), random.Next(0, floorHeight)).isOccupied){
                 creatureLocX = random.Next(1, floorWidth - 1);
                 creatureLocY = random.Next(1, floorHeight - 1);
             }
@@ -79,7 +79,7 @@ public class GameManager : MonoBehaviour {
             distanceToAnchor.z = Math.Abs(creatures[i].transform.position.z - creatures[i].transform.GetChild(0).transform.position.z); 
 
             Debug.Log(distanceToAnchor);
-            Vector3 placementPosition = pathfinding.GetGrid().GetWorldPosition(creatureLocX, creatureLocY) + UPathing.XZPlane(1, 1) * 0.5f;
+            Vector3 placementPosition = Pathfinding.GetGrid().GetWorldPosition(creatureLocX, creatureLocY) + UPathing.XZPlane(1, 1) * 0.5f;
 
             GameObject creatureObject = Instantiate(creatures[i], placementPosition, Quaternion.identity);
             
@@ -91,8 +91,8 @@ public class GameManager : MonoBehaviour {
             creatureObject.transform.Translate(distanceToAnchor);
 
             
-            pathfinding.GetGrid().GetXY(GetPosition(creatureObject), out int x, out int y);
-            UPathing.SetCreatureSpaceToOccupied(creatureObject, pathfinding.GetGrid(), x, y);
+            Pathfinding.GetGrid().GetXY(GetPosition(creatureObject), out int x, out int y);
+            UPathing.SetCreatureSpaceToOccupied(creatureObject, Pathfinding.GetGrid(), x, y);
         }
     }
 }

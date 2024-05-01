@@ -71,3 +71,4 @@ crashlytics-build.properties
 
 *.exr
 *.hdr
+Assets/Scripts/MeshCut/*

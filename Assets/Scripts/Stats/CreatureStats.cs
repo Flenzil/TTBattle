@@ -6,6 +6,7 @@ using CombatUtils;
 using System;
 using System.Linq;
 using UnityEngine.Rendering;
+using System.Diagnostics.CodeAnalysis;
 
 public class CreatureStats : MonoBehaviour
 {
@@ -62,6 +63,7 @@ public class CreatureStats : MonoBehaviour
         return proficientWeapons;
     }
 
+    /*
     public int GetProficiencyBonus(){
         if (GetLevel() >= 1 && GetLevel() < 5){
             return 2;
@@ -80,6 +82,29 @@ public class CreatureStats : MonoBehaviour
         }
 
         return 0;
+    }
+    */
+
+    public int GetProficiencyBonus(){
+        switch (GetLevel()){
+            case int profBonus when profBonus >=1 && profBonus < 5:
+                return profBonus;
+                
+            case int profBonus when profBonus >=5 && profBonus < 9:
+                return profBonus;
+
+            case int profBonus when profBonus >= 9 && profBonus < 13:
+                return profBonus;
+
+            case int profBonus when profBonus >= 13 && profBonus < 17:
+                return profBonus;
+
+            case int profBonus when profBonus >= 17 && profBonus <= 20:
+                return profBonus;
+
+            default:
+                return 0;
+        }
     }
 
     public Dictionary<AbilityScore, int> GetAbilityScores(){

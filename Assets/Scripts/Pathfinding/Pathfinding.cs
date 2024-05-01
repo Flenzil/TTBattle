@@ -8,6 +8,7 @@ using UnityEditor.Experimental.GraphView;
 using System.IO;
 using System.Linq;
 using System.Data.Common;
+using Unity.VisualScripting;
 
 public class Pathfinding {
 
@@ -20,7 +21,7 @@ public class Pathfinding {
     private const int MOVE_DIAGONAL_COST = 14;
 
     public static Pathfinding Instance {get; private set;}
-    private Grid<PathNode> grid;
+    private static Grid<PathNode> grid;
     private List<PathNode> openList;
     private List<PathNode> closedList;
     private bool isAttacking;
@@ -36,7 +37,7 @@ public class Pathfinding {
             (Grid<PathNode> g, int x, int y) => new PathNode(g, x, y)); // Instantiating grid object
     }
 
-    public Grid<PathNode> GetGrid() {
+    public static Grid<PathNode> GetGrid() {
         return grid;
     }
 
@@ -188,7 +189,6 @@ public class Pathfinding {
                 if (IsAnyPartOfCreatureSpaceDifficultTerrain(currentNode)){
                     difficultTerrainMod = 2;
                 }
-                Debug.Log(difficultTerrainMod);
 
                 int neighborGCost = currentNode.gCost + difficultTerrainMod * CalculateDistanceCost(currentNode, neighborNode);
                 if (neighborGCost < neighborNode.gCost) {
