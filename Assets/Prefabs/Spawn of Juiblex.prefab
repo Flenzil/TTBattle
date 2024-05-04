@@ -248,7 +248,7 @@ MonoBehaviour:
   pointDensity: 0.5
   explosionForce: 1000
   fadeSpeed: 0.1
-  shatterPieces: {fileID: 7470152869186688769, guid: 50ed992053a955f48af4cca684a140e8, type: 3}
+  shatterPieces: {fileID: 99925911977486643, guid: 50ed992053a955f48af4cca684a140e8, type: 3}
 --- !u!65 &-1413273099696551751
 BoxCollider:
   m_ObjectHideFlags: 0

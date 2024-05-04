@@ -8,18 +8,12 @@ using UnityEngine.UIElements;
 public class Shatter : MonoBehaviour {
 
     public float pointDensity = 0.1f;
-    public float explosionForce = 500;
+    public float explosionForce = 1000;
     public float fadeSpeed = 0.1f;
     
     [SerializeField] GameObject shatterPieces;
 
-    private Collider col;
     private GameObject shatteredObject;
-
-
-    void Start(){
-        col = GetComponent<MeshCollider>();
-    }
 
     public void Kill(int health){
         float critMultiplier = 1;
@@ -35,14 +29,12 @@ public class Shatter : MonoBehaviour {
             shatteredObject.transform.position,
             300f
         );
-        shatteredObject.AddComponent<FadeOut>();
         for (int i = 0; i < shatteredObject.transform.childCount; i++){
             shatteredObject.transform.GetChild(i).GetComponent<Rigidbody>().AddExplosionForce(
                 explosionForce,
                 shatteredObject.transform.position,
                 300f
             );
-            shatteredObject.transform.GetChild(i).AddComponent<FadeOut>();
         }
         Destroy(gameObject);
     }
