@@ -81,7 +81,7 @@ public class CombatManager : MonoBehaviour
         dieRoll = UCombat.RollDice(Die.d20);
 
         if (dieRoll == 20){
-            damage = diceDamage + attack.GetDamageRoll() + modifierDamage;
+            damage += attack.GetDamageRoll();
             target.GetComponent<Health>().Damage(damage);
             Debug.Log($"{attacker} CRITS {name} with {weapon} for {damage} damage!");
         }
@@ -98,7 +98,7 @@ public class CombatManager : MonoBehaviour
 
         if (target.GetComponent<Health>().GetCurrentHP() <= 0){
 
-            UPathing.SetCreatureSpaceToUnoccupied(target, Pathfinding.GetGrid());
+            UPathing.SetCreatureSpaceToUnoccupied(target);
             target.GetComponent<Shatter>().Kill(target.GetComponent<Health>().GetCurrentHP());
         }
     }

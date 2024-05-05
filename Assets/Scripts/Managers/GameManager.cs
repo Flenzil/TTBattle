@@ -92,7 +92,7 @@ public class GameManager : MonoBehaviour {
 
             
             Pathfinding.GetGrid().GetXY(GetPosition(creatureObject), out int x, out int y);
-            UPathing.SetCreatureSpaceToOccupied(creatureObject, Pathfinding.GetGrid(), x, y);
+            UPathing.SetCreatureSpaceToOccupied(creatureObject, x, y);
         }
     }
 }

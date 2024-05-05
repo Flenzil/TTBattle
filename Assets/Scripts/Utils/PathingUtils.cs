@@ -42,10 +42,10 @@ namespace PathingUtils {
         }
 
 
-        public static void ApplyFuncToCreatureSpace(GameObject creature, Grid<PathNode> grid, Action<int, int> func){
+        public static void ApplyFuncToCreatureSpace(GameObject creature, Action<int, int> func){
 
             CreatureSize creatureSize = creature.GetComponent<CreatureStats>().GetSize();
-            grid.GetXY(creature.transform.position, out int x, out int y);
+            Pathfinding.GetGrid().GetXY(creature.transform.position, out int x, out int y);
             GetSeekRadius(creatureSize, out int seekRadiusStart, out int seekRadiusEnd);
 
             for (int i = seekRadiusStart; i <= seekRadiusEnd; i++){
@@ -55,7 +55,7 @@ namespace PathingUtils {
             }
         }
 
-        public static void ApplyFuncToCreatureSpace(GameObject creature, Grid<PathNode> grid, int x, int y, Action<int, int> func){
+        public static void ApplyFuncToCreatureSpace(GameObject creature, int x, int y, Action<int, int> func){
 
             CreatureSize creatureSize = creature.GetComponent<CreatureStats>().GetSize();
             GetSeekRadius(creatureSize, out int seekRadiusStart, out int seekRadiusEnd);
@@ -67,20 +67,27 @@ namespace PathingUtils {
             }
         }
 
-        public static void SetCreatureSpaceToOccupied(GameObject creature, Grid<PathNode> grid){
-            ApplyFuncToCreatureSpace(creature, grid, (a, b) => grid.GetGridObject(a,b).SetOccupyingCreature(creature));
+        public static void SetCreatureSpaceToOccupied(GameObject creature){
+            ApplyFuncToCreatureSpace(creature, (a, b) => {
+                Pathfinding.GetGrid().GetGridObject(a,b).SetOccupyingCreature(creature);
+            });
         }
 
-        public static void SetCreatureSpaceToOccupied(GameObject creature, Grid<PathNode> grid, int x, int y){
-            ApplyFuncToCreatureSpace(creature, grid, x, y, (a, b) => grid.GetGridObject(a,b).SetOccupyingCreature(creature));
+        public static void SetCreatureSpaceToOccupied(GameObject creature, int x, int y){
+            ApplyFuncToCreatureSpace(creature, x, y, (a, b) => {
+                Pathfinding.GetGrid().GetGridObject(a,b).SetOccupyingCreature(creature);
+            });
         }
 
-        public static void SetCreatureSpaceToUnoccupied(GameObject creature, Grid<PathNode> grid){
-            ApplyFuncToCreatureSpace(creature, grid, (a, b) => grid.GetGridObject(a,b).ClearOccupyingCreature());
+        public static void SetCreatureSpaceToUnoccupied(GameObject creature){
+            Pathfinding.GetGrid().GetXY(creature.transform.GetChild(0).position, out int x, out int y);
+            SetCreatureSpaceToUnoccupied(creature, x, y);
         }
 
-        public static void SetCreatureSpaceToUnoccupied(GameObject creature, Grid<PathNode> grid, int x, int y){
-            ApplyFuncToCreatureSpace(creature, grid, x, y, (a, b) => grid.GetGridObject(a,b).ClearOccupyingCreature());
+        public static void SetCreatureSpaceToUnoccupied(GameObject creature, int x, int y){
+            ApplyFuncToCreatureSpace(creature, x, y, (a, b) => {
+                Pathfinding.GetGrid().GetGridObject(a,b).ClearOccupyingCreature();
+            });
         }
 
     }

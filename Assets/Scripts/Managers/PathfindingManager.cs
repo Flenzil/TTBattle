@@ -157,7 +157,6 @@ public class PathFindingManager : MonoBehaviour {
         
         UPathing.SetCreatureSpaceToOccupied(
             UGame.GetActiveCreature(),
-            GetGrid(),
             x,
             y
         );
@@ -301,7 +300,7 @@ public class PathFindingManager : MonoBehaviour {
         // Set every pathNode in creature's space to occupied
 
         Grid<PathNode> grid = GetGrid();
-        UPathing.SetCreatureSpaceToOccupied(creature, grid, positionNode.x, positionNode.y);
+        UPathing.SetCreatureSpaceToOccupied(creature, positionNode.x, positionNode.y);
     }
 
     private void ClearCreatureSpace(GameObject creature){
@@ -312,7 +311,7 @@ public class PathFindingManager : MonoBehaviour {
         GameObject anchor = creature.transform.GetChild(0).GameObject();
         grid.GetXY(anchor.transform.position, out int x, out int y);
 
-        UPathing.SetCreatureSpaceToUnoccupied(creature, grid, x, y);
+        UPathing.SetCreatureSpaceToUnoccupied(creature, x, y);
     }
 
 
