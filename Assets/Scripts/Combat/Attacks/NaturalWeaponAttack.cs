@@ -59,6 +59,15 @@ public class NaturalWeaponAttack : Attack {
         return naturalWeapon.attackRange;
     }
 
+    public override int GetWeaponLongRange()
+    {
+        return 0;
+    }
+
+    public override List<WeaponProperty> GetWeaponProperties(){
+        return null;
+    }
+
     public override void Override(out bool overrideToHit, out bool overrideDamage)
     {
         overrideToHit = naturalWeapon.overrideToHit;

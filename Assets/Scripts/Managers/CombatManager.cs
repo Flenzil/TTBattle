@@ -53,6 +53,14 @@ public class CombatManager : MonoBehaviour
 
 
         dieRoll = UCombat.RollDie(Die.d20);
+        if (
+            attack.GetWeaponProperties().Contains(WeaponProperty.Range)
+            && Vector3.Distance(UGame.GetActiveCreature().transform.position, target.transform.position) > attack.GetWeaponRange()
+            && Vector3.Distance(UGame.GetActiveCreature().transform.position, target.transform.position) < attack.GetWeaponLongRange()
+        ){
+            dieRoll = UCombat.RollDisadvantage(Die.d20);
+        }
+
 
         if (dieRoll == 20){
             damage += attack.GetDamageRoll();

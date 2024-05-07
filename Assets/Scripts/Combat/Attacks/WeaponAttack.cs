@@ -62,6 +62,15 @@ public class WeaponAttack : Attack, IAttack
         return weapon.weaponRange;
     }
 
+    public override int GetWeaponLongRange()
+    {
+        return weapon.weaponLongRange;
+    }
+
+    public override List<WeaponProperty> GetWeaponProperties(){
+        return weapon.weaponProperties;
+    }
+
     public override void Override(out bool overrideToHit, out bool overrideDamage)
     {
         overrideToHit = false;

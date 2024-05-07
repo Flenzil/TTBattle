@@ -8,9 +8,9 @@ using UnityEngine.Assertions.Must;
 [CreateAssetMenu]
 public class Weapon : ScriptableObject {
 
+    public WeaponType weaponType;
     public List<Die> damageDie;
     public List<DamageType> damageType;
-    public WeaponType weaponType;
     public List<WeaponProperty> weaponProperties;
 
     [HideInInspector] public int weaponRange = 5;

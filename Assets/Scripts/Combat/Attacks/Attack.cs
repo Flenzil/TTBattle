@@ -14,6 +14,8 @@ public abstract class Attack
     public abstract int GetBonusToHit();
     public abstract WeaponType GetWeaponType();
     public abstract int GetWeaponRange();
+    public abstract int GetWeaponLongRange();
+    public abstract List<WeaponProperty> GetWeaponProperties();
     public abstract void Override(out bool overrideToHit, out bool overrideDamage);
 
 }
