@@ -1,7 +1,9 @@
+using System.Collections.Generic;
+using UnityEngine;
 using CombatUtils;
 using CreatureUtils;
 
-public class NaturalWeaponAttack : Attack, IAttack {
+public class NaturalWeaponAttack : Attack {
 
 
     private NaturalWeapon naturalWeapon;
@@ -20,7 +22,7 @@ public class NaturalWeaponAttack : Attack, IAttack {
         int damage = 0; 
 
         for (int i = 0; i < naturalWeapon.damageDieAmount; i++){
-            damage += UCombat.RollDice(naturalWeapon.damageDieSize);
+            damage += UCombat.RollDie(naturalWeapon.damageDieSize);
         }
 
         return damage;
@@ -31,9 +33,12 @@ public class NaturalWeaponAttack : Attack, IAttack {
         return naturalWeapon.attackName;
     }
 
-    public override AbilityScore GetDamageModifier()
+    public override List<AbilityScore> GetDamageModifier()
     {
-        return naturalWeapon.damageModifier;
+        return new List<AbilityScore>()
+        {
+            naturalWeapon.damageModifier
+        };
     }
 
     public override int GetBonusToHit(){

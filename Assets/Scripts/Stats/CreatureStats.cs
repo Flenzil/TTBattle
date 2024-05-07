@@ -63,48 +63,16 @@ public class CreatureStats : MonoBehaviour
         return proficientWeapons;
     }
 
-    /*
     public int GetProficiencyBonus(){
-        if (GetLevel() >= 1 && GetLevel() < 5){
-            return 2;
-        }
-        if (GetLevel() >= 5 && GetLevel() < 9){
-            return 3;
-        }
-        if (GetLevel() >= 9 && GetLevel() < 13){
-            return 4;
-        }
-        if (GetLevel() >= 13 && GetLevel() < 17){
-            return 5;
-        }
-        if (GetLevel() >= 17 && GetLevel() <= 20){
-            return 6;
-        }
-
-        return 0;
-    }
-    */
-
-    public int GetProficiencyBonus(){
-        switch (GetLevel()){
-            case int profBonus when profBonus >=1 && profBonus < 5:
-                return profBonus;
-                
-            case int profBonus when profBonus >=5 && profBonus < 9:
-                return profBonus;
-
-            case int profBonus when profBonus >= 9 && profBonus < 13:
-                return profBonus;
-
-            case int profBonus when profBonus >= 13 && profBonus < 17:
-                return profBonus;
-
-            case int profBonus when profBonus >= 17 && profBonus <= 20:
-                return profBonus;
-
-            default:
-                return 0;
-        }
+        return GetLevel() switch
+        {
+            int level when level >= 1 && level < 5 => 2,
+            int level when level >= 5 && level < 9 => 3,
+            int level when level >= 9 && level < 13 => 4,
+            int level when level >= 13 && level < 17 => 5,
+            int level when level >= 17 && level <= 20 => 6,
+            _ => 0,
+        };
     }
 
     public Dictionary<AbilityScore, int> GetAbilityScores(){

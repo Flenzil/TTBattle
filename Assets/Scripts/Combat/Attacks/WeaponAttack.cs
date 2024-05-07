@@ -22,7 +22,7 @@ public class WeaponAttack : Attack, IAttack
         int damage = 0; 
 
         for (int i = 0; i < weapon.damageDie.Count; i++){
-            damage += UCombat.RollDice(weapon.damageDie[i]);
+            damage += UCombat.RollDie(weapon.damageDie[i]);
         }
 
         return damage;
@@ -32,7 +32,10 @@ public class WeaponAttack : Attack, IAttack
         return weapon.name;
     }
 
-    public override AbilityScore GetDamageModifier(){
+    public override List<AbilityScore> GetDamageModifier(){
+        if (weapon.weaponProperties.Contains(WeaponProperty.Finesse)){
+            weapon.damageModifier.Add(AbilityScore.dexterity);
+        }
         return weapon.damageModifier;
     }
 
@@ -53,6 +56,9 @@ public class WeaponAttack : Attack, IAttack
 
     public override int GetWeaponRange()
     {
+        if (weapon.weaponProperties.Contains(WeaponProperty.Reach)){
+            return weapon.weaponRange + 5;
+        }
         return weapon.weaponRange;
     }
 

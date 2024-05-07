@@ -16,6 +16,6 @@ MonoBehaviour:
   damageType: 02000000
   damageModifier: 0
   weaponType: 19
+  weaponProperties: 0a000000
   weaponRange: 5
-  magical: 0
-  magicalEffects: {fileID: 0}
+  weaponLongRange: 0

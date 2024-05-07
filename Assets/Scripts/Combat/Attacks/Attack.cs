@@ -9,7 +9,7 @@ public abstract class Attack
     public abstract string GetAttackName();
     public abstract DamageType GetDamageType();
     public abstract int GetDamageRoll();
-    public abstract AbilityScore GetDamageModifier();
+    public abstract List<AbilityScore> GetDamageModifier();
     public abstract int GetBonusToDamage();
     public abstract int GetBonusToHit();
     public abstract WeaponType GetWeaponType();

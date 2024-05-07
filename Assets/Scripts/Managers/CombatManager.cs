@@ -42,34 +42,8 @@ public class CombatManager : MonoBehaviour
     public void Attack(GameObject target, Attack attack){
         PathToTarget(target);
 
-        AbilityScore attackAbility = attack.GetDamageModifier();
-
-        attack.Override(out bool overrideToHit, out bool overrideDamage);
-
-        int modifierDamage;
-        if (overrideDamage){
-            modifierDamage = attack.GetBonusToDamage();
-        } else{
-            modifierDamage = AbilityModifier(
-                UGame.GetActiveCreatureStats()
-                .GetAbilityScores()[attackAbility]
-                ) + attack.GetBonusToDamage();
-        }
-
-        int modifierToHit;
-        if (overrideToHit) {
-            modifierToHit = attack.GetBonusToHit();
-        } else {
-            modifierToHit = AbilityModifier(
-                UGame.GetActiveCreatureStats()
-                .GetAbilityScores()[attackAbility]
-                ) + attack.GetBonusToHit();
-
-            if (IsProfientWithWeapon()){
-                modifierToHit += UGame.GetActiveCreatureStats().GetProficiencyBonus();
-            }
-        }   
-
+        FindHitAndDamageModifiers(attack, out int modifierDamage, out int modifierToHit);
+        
         int diceDamage = attack.GetDamageRoll();
 
         int damage = diceDamage + modifierDamage;
@@ -78,7 +52,7 @@ public class CombatManager : MonoBehaviour
         string name = target.name;
 
 
-        dieRoll = UCombat.RollDice(Die.d20);
+        dieRoll = UCombat.RollDie(Die.d20);
 
         if (dieRoll == 20){
             damage += attack.GetDamageRoll();
@@ -101,6 +75,50 @@ public class CombatManager : MonoBehaviour
             UPathing.SetCreatureSpaceToUnoccupied(target);
             target.GetComponent<Shatter>().Kill(target.GetComponent<Health>().GetCurrentHP());
         }
+    }
+
+
+    private void FindHitAndDamageModifiers(Attack attack, out int modifierToHit, out int modifierDamage){
+
+        AbilityScore attackAbility = FindBestAttackAbility(attack.GetDamageModifier());
+        attack.Override(out bool overrideToHit, out bool overrideDamage);
+
+        if (overrideDamage){
+            modifierDamage = attack.GetBonusToDamage();
+        } else{
+            modifierDamage = AbilityModifier(
+                UGame.GetActiveCreatureStats()
+                .GetAbilityScores()[attackAbility]
+                ) + attack.GetBonusToDamage();
+        }
+
+        if (overrideToHit) {
+            modifierToHit = attack.GetBonusToHit();
+        } else {
+            modifierToHit = AbilityModifier(
+                UGame.GetActiveCreatureStats()
+                .GetAbilityScores()[attackAbility]
+                ) + attack.GetBonusToHit();
+
+            if (IsProfientWithWeapon()){
+                modifierToHit += UGame.GetActiveCreatureStats().GetProficiencyBonus();
+            }
+        }   
+
+    }
+
+    private AbilityScore FindBestAttackAbility(List<AbilityScore> abilityScores){
+        AbilityScore bestAttackAbility = abilityScores[0];
+
+        foreach (AbilityScore abilityScore in abilityScores){
+            if (
+                UGame.GetActiveCreatureStats().GetAbilityScores()[abilityScore] 
+                > UGame.GetActiveCreatureStats().GetAbilityScores()[bestAttackAbility]
+            ){
+                bestAttackAbility = abilityScore;
+            }
+        }
+        return bestAttackAbility;
     }
 
     private int AbilityModifier(int abilityScore){

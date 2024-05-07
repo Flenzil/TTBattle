@@ -78,6 +78,20 @@ namespace CombatUtils {
         whip,
     }
 
+    public enum WeaponProperty {
+        Ammunition,
+        Finesse,
+        Heavy,
+        Light,
+        Loading,
+        Range,
+        Reach,
+        Special,
+        Thrown,
+        TwoHanded,
+        Versatile
+    }
+
     [Serializable] 
     public struct NaturalWeapon {
 
@@ -126,7 +140,7 @@ namespace CombatUtils {
                 return false;
             }
         }
-        public static int RollDice(Die die){
+        public static int RollDie(Die die){
             int dieMax;
             switch (die){
                 case Die.d4:
@@ -157,6 +171,14 @@ namespace CombatUtils {
             }
             System.Random random = new();
             return random.Next(1, dieMax + 1);
+        }
+
+        public static int RollDisadvantage(Die die){
+            return Math.Min(RollDie(die), RollDie(die));
+        }
+
+        public static int RollAdvantage(Die die){
+            return Math.Max(RollDie(die), RollDie(die));
         }
     }
 }

@@ -8,25 +8,15 @@ using UnityEngine.Assertions.Must;
 [CreateAssetMenu]
 public class Weapon : ScriptableObject {
 
-
     public List<Die> damageDie;
     public List<DamageType> damageType;
-    public AbilityScore damageModifier;
     public WeaponType weaponType;
-    public int weaponRange;
+    public List<WeaponProperty> weaponProperties;
 
-    public bool magical = false;
+    [HideInInspector] public int weaponRange = 5;
+    [HideInInspector] public int weaponLongRange = 0;
+    [HideInInspector] public List<AbilityScore> damageModifier = new(){
+        AbilityScore.strength
+    };
 
-    public ScriptableObject magicalEffects;
-    
-    /*
-    int WeaponDamage(){
-        return numberOfDamageDie * damageDie;
-    }
-
-    int AdditionalWeaponDamage(){
-        return additionalDamage;
-
-    }
-    */
 }

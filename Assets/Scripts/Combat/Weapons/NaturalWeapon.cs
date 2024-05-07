@@ -1,6 +1,8 @@
 using CombatUtils;
 using CreatureUtils;
 using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace Weapons{
 
