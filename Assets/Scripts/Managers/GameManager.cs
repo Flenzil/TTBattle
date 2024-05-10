@@ -46,6 +46,13 @@ public class GameManager : MonoBehaviour {
     }
 
     private void Update() {
+        if (Input.GetKey(KeyCode.B)) {
+            UGame.GetActiveCreatureStats().SetCondition(Condition.blinded);
+        }
+
+        if (Input.GetKey(KeyCode.I)) {
+            UGame.GetActiveCreatureStats().SetCondition(Condition.invisible);
+        }
     }
 
 

@@ -32,7 +32,7 @@ public class GeneralActions
         }
 
         public static void Dodge(){
-
+            UGame.GetActiveCreatureStats().hasDisadvantageToBeHit = true;
         }
 
     }

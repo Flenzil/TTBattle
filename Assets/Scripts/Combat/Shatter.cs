@@ -17,7 +17,7 @@ public class Shatter : MonoBehaviour {
 
     public void Kill(int health){
         float critMultiplier = 1;
-        if (CombatManager.dieRoll == 20){
+        if (CombatManager.attackRoll == 20){
             critMultiplier = 1.5f;
         }
         if (health < -10 || critMultiplier > 1){

@@ -12,6 +12,12 @@ public class CreatureStats : MonoBehaviour
 {
     [SerializeField] Creature stats;
 
+    public bool hasAdvantageToHit = false;
+    public bool hasDisadvantageToHit = false;
+    public bool hasAdvantageToBeHit = false;
+    public bool hasDisadvantageToBeHit = false;
+    public List<Condition> currentConditions = new();
+
     private int remainingMovement;
     public int GetMaxHP(){ return stats.maxHP;}
     public int GetAC(){ return stats.ac;}
@@ -87,5 +93,10 @@ public class CreatureStats : MonoBehaviour
         {AbilityScore.charisma, stats.charisma},
         {AbilityScore.none, -1}
         };
+    }
+
+    public void SetCondition(Condition condition){
+        Conditions.ApplyCondition(condition, gameObject.GetComponent<CreatureStats>());
+        currentConditions.Add(condition);
     }
 }

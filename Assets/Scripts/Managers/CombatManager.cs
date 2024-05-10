@@ -10,7 +10,7 @@ using PathingUtils;
 public class CombatManager : MonoBehaviour
 {
     private static CombatManager instance;
-    public static int dieRoll;
+    public static int attackRoll;
 
     // Start is called before the first frame update
     void Start()
@@ -51,29 +51,20 @@ public class CombatManager : MonoBehaviour
         string attacker = UGame.GetActiveCreature().name;
         string name = target.name;
 
+        attackRoll = RollToAttack(attack, target);
 
-        dieRoll = UCombat.RollDie(Die.d20);
-        if (
-            attack.GetWeaponProperties().Contains(WeaponProperty.Range)
-            && Vector3.Distance(UGame.GetActiveCreature().transform.position, target.transform.position) > attack.GetWeaponRange()
-            && Vector3.Distance(UGame.GetActiveCreature().transform.position, target.transform.position) < attack.GetWeaponLongRange()
-        ){
-            dieRoll = UCombat.RollDisadvantage(Die.d20);
-        }
-
-
-        if (dieRoll == 20){
+        if (attackRoll == 20){
             damage += attack.GetDamageRoll();
             target.GetComponent<Health>().Damage(damage);
             Debug.Log($"{attacker} CRITS {name} with {weapon} for {damage} damage!");
         }
-        else if (dieRoll + modifierToHit >= UGame.GetCreatureStats(target).GetAC()){
-            Debug.Log($"{attacker} rolls {dieRoll} + {modifierToHit}");
+        else if (attackRoll + modifierToHit >= UGame.GetCreatureStats(target).GetAC()){
+            Debug.Log($"{attacker} rolls {attackRoll} + {modifierToHit}");
             target.GetComponent<Health>().Damage(damage);
             Debug.Log($"{attacker} hits {name} with {weapon} for {damage} damage!");
         } 
         else {
-            Debug.Log($"{attacker} rolls {dieRoll} + {modifierToHit}");
+            Debug.Log($"{attacker} rolls {attackRoll} + {modifierToHit}");
             Debug.Log($"{attacker} misses {name} with {weapon}!");
         }
         Debug.Log($"{name} is now on {target.GetComponent<Health>().GetCurrentHP()} HP");
@@ -85,6 +76,56 @@ public class CombatManager : MonoBehaviour
         }
     }
 
+    private int RollToAttack(Attack attack, GameObject target){
+
+        // For various reasons, attacks can have advantage (roll twice, take highest result) or 
+        // disadvantage (roll twice, take lowest result) but these effects cancel eachother out.
+        // Even one source of advantage can cancel out 100 sources of disadvanage and vice versa.
+
+        bool hasAdvantage = false;
+        bool hasDisadvantage = false;
+
+
+        // Ranged weapon at long range
+        if (
+            attack.GetWeaponProperties().Contains(WeaponProperty.Range)
+            && Vector3.Distance(UGame.GetActiveCreature().transform.position, target.transform.position) > attack.GetWeaponRange()
+            && Vector3.Distance(UGame.GetActiveCreature().transform.position, target.transform.position) < attack.GetWeaponLongRange()
+        ) {
+            hasDisadvantage = true;
+        }
+
+        if (
+            UGame.GetActiveCreatureStats().hasDisadvantageToHit
+            || target.GetComponent<CreatureStats>().hasDisadvantageToBeHit
+        ){
+            hasDisadvantage = true;
+        }
+
+        if ( 
+            UGame.GetActiveCreatureStats().hasAdvantageToHit
+            || target.GetComponent<CreatureStats>().hasAdvantageToBeHit
+        ){
+            hasAdvantage = true;
+        }
+
+        if (hasAdvantage && hasDisadvantage){
+            Debug.Log("Straight Roll");
+            return UCombat.RollDie(Die.d20);
+        }
+        if (hasAdvantage){
+            Debug.Log("Advantage");
+            return UCombat.RollAdvantage(Die.d20);
+        }
+        if (hasDisadvantage){
+            Debug.Log("Disadvantage");
+            return UCombat.RollDisadvantage(Die.d20);
+        }
+
+        Debug.Log("Straight Roll");
+        return UCombat.RollDie(Die.d20);
+
+    }
 
     private void FindHitAndDamageModifiers(Attack attack, out int modifierToHit, out int modifierDamage){
 
