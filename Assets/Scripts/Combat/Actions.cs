@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using CombatUtils;
 using UnityEngine;
 
-public class Actions : GeneralActions
+public class Actions : MonoBehaviour
 {
     [SerializeField] List<Weapon> weapons;
     [SerializeField] List<NaturalWeapon> naturalWeapons;

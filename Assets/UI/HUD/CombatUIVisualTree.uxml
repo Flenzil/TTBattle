@@ -1,4 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <Style src="project://database/Assets/UI/CombatUIStyle.uss?fileID=7433441132597879392&amp;guid=03dfaa718579e884587ee1b70411ad63&amp;type=3#CombatUIStyle" />
+    <Style src="project://database/Assets/UI/HUD/CombatUIStyle.uss?fileID=7433441132597879392&amp;guid=03dfaa718579e884587ee1b70411ad63&amp;type=3#CombatUIStyle" />
     <ui:VisualElement name="WeaponRow" style="flex-grow: 1; flex-basis: 20%; justify-content: flex-start; flex-direction: row; flex-wrap: nowrap; width: auto; height: 10%; max-height: 10%; bottom: auto; top: 90%;" />
+    <ui:VisualElement name="ActionsRow" style="flex-grow: 1; top: 70%; height: 10%; max-height: 10%; bottom: auto; flex-direction: row;" />
 </ui:UXML>
