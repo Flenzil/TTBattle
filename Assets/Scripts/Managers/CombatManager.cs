@@ -40,7 +40,7 @@ public class CombatManager : MonoBehaviour
     }
 
     public void Attack(GameObject target, Attack attack){
-        PathToTarget(target);
+        //PathToTarget(target);
 
         FindHitAndDamageModifiers(attack, out int modifierToHit, out int modifierDamage);
         
@@ -85,12 +85,16 @@ public class CombatManager : MonoBehaviour
         bool hasAdvantage = false;
         bool hasDisadvantage = false;
 
+        float distanceToTarget = Vector3.Distance(
+            UPathing.GetPosition(UGame.GetActiveCreature()), UPathing.GetPosition(target)
+            );
+
 
         // Ranged weapon at long range
         if (
             attack.GetWeaponProperties().Contains(WeaponProperty.Range)
-            && Vector3.Distance(UGame.GetActiveCreature().transform.position, target.transform.position) > attack.GetWeaponRange()
-            && Vector3.Distance(UGame.GetActiveCreature().transform.position, target.transform.position) < attack.GetWeaponLongRange()
+            && 5 * distanceToTarget > attack.GetWeaponRange()
+            && 5 * distanceToTarget <= attack.GetWeaponLongRange()
         ) {
             hasDisadvantage = true;
         }

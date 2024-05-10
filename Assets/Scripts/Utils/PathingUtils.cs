@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using CreatureUtils;
 using NUnit.Framework;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace PathingUtils {
@@ -33,6 +34,10 @@ namespace PathingUtils {
                     seekRadiusEnd = 0;
                     break;
             }
+        }
+
+        public static Vector3 GetPosition(GameObject creature){
+            return creature.transform.GetChild(0).position;
         }
 
 
