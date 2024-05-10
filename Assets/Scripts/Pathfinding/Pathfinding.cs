@@ -366,6 +366,7 @@ public class Pathfinding {
                 out targetSeekRadiusStart, 
                 out targetSeekRadiusEnd
                 );
+
             weaponRange = UGame.GetActiveAttack().GetWeaponRange() / 5;
         }
 
@@ -570,16 +571,16 @@ public class Pathfinding {
             path = CutOccupiedSpaceFromPath(path);
         }
 
+        // If the creature CAN pass through the blocking creature but doesn't have enough movement to do
+        // so, end the path.
         int remainingMovement = UGame.GetActiveCreatureStats().GetRemainingMovement() / 5;
         if (path.Count() > remainingMovement + 1){
             if (path[remainingMovement + 1].isOccupied){
-                for (int i = remainingMovement; i < path.Count(); i++){
-                    path.RemoveAt(i);
+                for (int i = 0; i < path.Count() - remainingMovement; i++){
+                    path.Remove(path.Last());
                 }
             } 
         }
-
-
         return path;
     }
 

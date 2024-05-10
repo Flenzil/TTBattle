@@ -63,34 +63,37 @@ public class GameManager : MonoBehaviour {
     }
 
     private void SpawnCreatures(){
+        
+        // Set random grid position 
         for (int i = 0; i < creatures.Count; i++){
             System.Random random = new();
             int creatureLocX = random.Next(1, floorWidth - 1);
             int creatureLocY = random.Next(1, floorHeight - 1);
 
+            // Ensure creatures don't spawn on top of each other
             while (Pathfinding.GetGrid().GetGridObject(random.Next(0,floorWidth), random.Next(0, floorHeight)).isOccupied){
                 creatureLocX = random.Next(1, floorWidth - 1);
                 creatureLocY = random.Next(1, floorHeight - 1);
             }
 
+            // Translate the model so that the anchor (child object) is centred on a grid node
             Vector3 distanceToAnchor;
             distanceToAnchor.x = Math.Abs(creatures[i].transform.position.x - creatures[i].transform.GetChild(0).transform.position.x); 
             distanceToAnchor.y = Math.Abs(creatures[i].transform.position.y - creatures[i].transform.GetChild(0).transform.position.y); 
             distanceToAnchor.z = Math.Abs(creatures[i].transform.position.z - creatures[i].transform.GetChild(0).transform.position.z); 
 
-            Debug.Log(distanceToAnchor);
             Vector3 placementPosition = Pathfinding.GetGrid().GetWorldPosition(creatureLocX, creatureLocY) + UPathing.XZPlane(1, 1) * 0.5f;
 
+            Debug.Log(creatures[i]);
             GameObject creatureObject = Instantiate(creatures[i], placementPosition, Quaternion.identity);
+            creatureObject.transform.Translate(distanceToAnchor);
             
+            // Set layer, name and default weapon
             creatureObject.layer = LayerMask.NameToLayer("Creatures");
             creatureObject.name = creatures[i].name;
-
-            Vector3 creaturePosition = GetPosition(creatureObject);
-
-            creatureObject.transform.Translate(distanceToAnchor);
-
+            creatureObject.GetComponent<Actions>().SetActiveAttack(creatureObject.GetComponent<Actions>().GetAttacks()[0]);
             
+            // Set creatures space to occupied
             Pathfinding.GetGrid().GetXY(GetPosition(creatureObject), out int x, out int y);
             UPathing.SetCreatureSpaceToOccupied(creatureObject, x, y);
         }

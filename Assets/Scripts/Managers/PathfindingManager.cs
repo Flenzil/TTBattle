@@ -52,6 +52,9 @@ public class PathFindingManager : MonoBehaviour {
         HandleMovement();
 
         if (Input.GetMouseButtonDown(0)) {
+            if (UGame.GetActiveCreature() == null){
+                return;
+            }
 
             if (UGame.GetActiveCreatureStats().GetRemainingMovement() == 0){
                 Debug.Log("Out of movement!");

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using CombatUtils;
 using CreatureUtils;
-using UnityEngine.Assertions.Must;
 
 [CreateAssetMenu]
 public class Weapon : ScriptableObject {
@@ -15,8 +14,6 @@ public class Weapon : ScriptableObject {
 
     [HideInInspector] public int weaponRange = 5;
     [HideInInspector] public int weaponLongRange = 0;
-    [HideInInspector] public List<AbilityScore> damageModifier = new(){
-        AbilityScore.strength
-    };
+    [HideInInspector] public List<AbilityScore> damageModifier;
 
 }

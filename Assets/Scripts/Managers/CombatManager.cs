@@ -42,7 +42,7 @@ public class CombatManager : MonoBehaviour
     public void Attack(GameObject target, Attack attack){
         PathToTarget(target);
 
-        FindHitAndDamageModifiers(attack, out int modifierDamage, out int modifierToHit);
+        FindHitAndDamageModifiers(attack, out int modifierToHit, out int modifierDamage);
         
         int diceDamage = attack.GetDamageRoll();
 

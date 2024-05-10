@@ -65,7 +65,7 @@ public class NaturalWeaponAttack : Attack {
     }
 
     public override List<WeaponProperty> GetWeaponProperties(){
-        return null;
+        return new List<WeaponProperty>();
     }
 
     public override void Override(out bool overrideToHit, out bool overrideDamage)

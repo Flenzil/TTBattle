@@ -33,6 +33,7 @@ public class WeaponAttack : Attack, IAttack
     }
 
     public override List<AbilityScore> GetDamageModifier(){
+        weapon.damageModifier.Add(AbilityScore.strength);
         if (weapon.weaponProperties.Contains(WeaponProperty.Finesse)){
             weapon.damageModifier.Add(AbilityScore.dexterity);
         }
