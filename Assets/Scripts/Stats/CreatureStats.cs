@@ -96,7 +96,22 @@ public class CreatureStats : MonoBehaviour
     }
 
     public void SetCondition(Condition condition){
-        Conditions.ApplyCondition(condition, gameObject.GetComponent<CreatureStats>());
+        Conditions.ApplyCondition(condition, GetComponent<CreatureStats>());
         currentConditions.Add(condition);
     }
+
+    public void ClearCondition(Condition condition){
+        
+        // Since multiple conditions can cause the same effects (e.g disadvantage on attacks),
+        // removing a condition is not as simple as removing its effects. So we remove the effects
+        // and then reapply all other conditions.
+        // I think this is just about the least efficient way to do it but it is unlikely that
+        // a creature will have even 2 conditions at the same time so its probably not that bad. 
+        
+        Conditions.ClearCondition(condition, GetComponent<CreatureStats>());
+        currentConditions.Remove(condition);
+        foreach (Condition currentCondition in currentConditions){
+            Conditions.ApplyCondition(currentCondition, GetComponent<CreatureStats>());
+        }
+    }   
 }
