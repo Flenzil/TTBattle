@@ -26,13 +26,13 @@ public class GeneralActions
 
         // Actions
         public static void Dash(){
-            int remainingMovement = UGame.GetActiveCreatureStats().GetRemainingMovement();
-            int moveSpeed = UGame.GetActiveCreatureStats().GetMovementSpeed();
-            UGame.GetActiveCreatureStats().SetReaminingMovement(remainingMovement + moveSpeed);
+            int remainingMovement = UGame.GetActiveCreature().GetRemainingMovement();
+            int moveSpeed = UGame.GetActiveCreature().GetMovementSpeed();
+            UGame.GetActiveCreature().SetReaminingMovement(remainingMovement + moveSpeed);
         }
 
         public static void Dodge(){
-            UGame.GetActiveCreatureStats().hasDisadvantageToBeHit = true;
+            UGame.GetActiveCreature().hasDisadvantageToBeHit = true;
         }
 
     }

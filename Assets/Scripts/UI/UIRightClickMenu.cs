@@ -54,7 +54,7 @@ public class RightClickMenu : MonoBehaviour
 
             if (IsMouseClickOnCreature(out RaycastHit hit)){
                 AddButton("Attack", ()=>{
-                    CombatManager.Instance.Attack(hit.transform.GameObject(), UGame.GetActiveAttack());
+                    CombatManager.Instance.Attack(hit.transform.GetComponent<Creature>(), UGame.GetActiveAttack());
                     }
                 );
             }

@@ -7,16 +7,19 @@ using System;
 using System.Linq;
 using UnityEngine.Rendering;
 using System.Diagnostics.CodeAnalysis;
+using UnityEditorInternal;
 
-public class CreatureStats : MonoBehaviour
+public class Creature : MonoBehaviour
 {
-    [SerializeField] Creature stats;
+    [SerializeField] SOCreature stats;
 
     public bool hasAdvantageToHit = false;
     public bool hasDisadvantageToHit = false;
     public bool hasAdvantageToBeHit = false;
     public bool hasDisadvantageToBeHit = false;
     public List<Condition> currentConditions = new();
+
+    private List<PathNode> occupiedNodes = new();
 
     private int remainingMovement;
     public int GetMaxHP(){ return stats.maxHP;}
@@ -27,6 +30,105 @@ public class CreatureStats : MonoBehaviour
 
     void Start(){
         remainingMovement = GetMovementSpeed();
+    }
+    
+
+    public Vector3 GetPosition(){
+        // The centre of a creature is determined by an anchor GameObject which is parented to the creature.
+        return transform.GetChild(0).position;
+    }
+
+    public void GetSeekRadius(out int seekRadiusStart, out int seekRadiusEnd){
+        switch(GetSize()){
+            case CreatureSize.large:
+                seekRadiusStart = 0;
+                seekRadiusEnd = 1;
+                break;
+            case CreatureSize.huge:
+                seekRadiusStart = -1;
+                seekRadiusEnd = 1;
+                break;
+            case CreatureSize.gargantuan:
+                seekRadiusStart = -1;
+                seekRadiusEnd = 2;
+                break;
+            default:
+                seekRadiusStart = 0;
+                seekRadiusEnd = 0;
+                break;
+        }
+    }
+
+    public List<PathNode> GetOccupiedNodes(){
+        return occupiedNodes;
+    }
+
+    public void SetOccupiedNodes(List<PathNode> pathNodes) {
+        occupiedNodes = pathNodes;
+    }
+
+    public List<PathNode> GetOccupiedNodes(PathNode node){
+        // Returns nodes that a creature would occupy if it were positioned at
+        // node. Useful for pathfinding.
+        GetSeekRadius(out int seekRadiusStart, out int seekRadiusEnd);
+        List<PathNode> nodes = new();
+
+        for (int i = seekRadiusStart; i <= seekRadiusEnd; i++){
+            for (int j = seekRadiusStart; j <= seekRadiusEnd; j++){
+                PathNode currentNode = Pathfinding.GetGrid().GetGridObject(node.x + i, node.y + j);
+                if (currentNode != null){
+                    nodes.Add(currentNode);
+                }
+            }
+        }
+        return nodes;
+    }
+
+    public void ApplyFuncToCreatureSpace(Action<int, int> func){
+
+        GetSeekRadius(out int seekRadiusStart, out int seekRadiusEnd);
+        Pathfinding.GetGrid().GetXY(GetPosition(), out int x, out int y);
+
+        for (int i = seekRadiusStart; i <= seekRadiusEnd; i++){
+            for (int j = seekRadiusStart; j <= seekRadiusEnd; j++){
+                func(x + i, y + j);
+            }
+        }
+    }
+
+    public void ApplyFuncToCreatureSpace(int x, int y, Action<int, int> func){
+
+        GetSeekRadius(out int seekRadiusStart, out int seekRadiusEnd);
+
+        for (int i = seekRadiusStart; i <= seekRadiusEnd; i++){
+            for (int j = seekRadiusStart; j <= seekRadiusEnd; j++){
+                func(x + i, y + j);
+            }
+        }
+    }
+
+    public void SetCreatureSpaceToOccupied(){
+        ApplyFuncToCreatureSpace((a, b) => {
+            Pathfinding.GetGrid().GetGridObject(a,b).SetOccupyingCreature(this);
+            occupiedNodes.Add(Pathfinding.GetGrid().GetGridObject(a,b));
+        });
+    }
+
+    public void SetCreatureSpaceToOccupied(int x, int y){
+        ApplyFuncToCreatureSpace(x, y, (a, b) => {
+            Pathfinding.GetGrid().GetGridObject(a,b).SetOccupyingCreature(this);
+        });
+    }
+
+    public void SetCreatureSpaceToUnoccupied(){
+        Pathfinding.GetGrid().GetXY(GetPosition(), out int x, out int y);
+        SetCreatureSpaceToUnoccupied(x, y);
+    }
+
+    public void SetCreatureSpaceToUnoccupied(int x, int y){
+        ApplyFuncToCreatureSpace(x, y, (a, b) => {
+            Pathfinding.GetGrid().GetGridObject(a,b).ClearOccupyingCreature();
+        });
     }
 
     public int GetRemainingMovement(){
@@ -96,7 +198,7 @@ public class CreatureStats : MonoBehaviour
     }
 
     public void SetCondition(Condition condition){
-        Conditions.ApplyCondition(condition, GetComponent<CreatureStats>());
+        Conditions.ApplyCondition(condition, this);
         currentConditions.Add(condition);
     }
 
@@ -108,10 +210,10 @@ public class CreatureStats : MonoBehaviour
         // I think this is just about the least efficient way to do it but it is unlikely that
         // a creature will have even 2 conditions at the same time so its probably not that bad. 
         
-        Conditions.ClearCondition(condition, GetComponent<CreatureStats>());
+        Conditions.ClearCondition(condition, this);
         currentConditions.Remove(condition);
         foreach (Condition currentCondition in currentConditions){
-            Conditions.ApplyCondition(currentCondition, GetComponent<CreatureStats>());
+            Conditions.ApplyCondition(currentCondition, this);
         }
     }   
 }

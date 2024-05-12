@@ -17,7 +17,7 @@ public class PathNode
     public bool isWalkable;
     public bool isOccupied = false;
     public bool isDifficultTerrain = false;
-    private GameObject occupyingCreature = null;
+    private Creature occupyingCreature = null;
 
     public PathNode cameFromNode;
 
@@ -41,7 +41,7 @@ public class PathNode
         return isWalkable;
     }
 
-    public void SetOccupyingCreature(GameObject creature){
+    public void SetOccupyingCreature(Creature creature){
         occupyingCreature = creature;
         isOccupied = true;
         isDifficultTerrain = true;
@@ -55,12 +55,12 @@ public class PathNode
         grid.TriggerGridObjectChanged(x, y);
     }
 
-    public GameObject GetOccupyingCreature(){
+    public Creature GetOccupyingCreature(){
         return occupyingCreature;
     }
 
     public CreatureSize GetOccupyingCreatureSize(){
-        return occupyingCreature.GetComponent<CreatureStats>().GetSize();
+        return occupyingCreature.GetSize();
     }
 
     public override string ToString()

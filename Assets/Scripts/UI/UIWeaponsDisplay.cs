@@ -11,7 +11,7 @@ using UnityEngine.UIElements;
 public class UIWeaponsDisplay : MonoBehaviour
 {
     private UIDocument uIDocument;
-    private GameObject activeCreature = null;
+    private Creature activeCreature = null;
     public VisualTreeAsset weaponButtonTemplate;
     public StyleSheet weaponButtonStyle;
 

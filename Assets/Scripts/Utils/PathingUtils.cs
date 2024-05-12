@@ -41,12 +41,13 @@ namespace PathingUtils {
         }
 
 
-        public static bool IsOccupiedByEnemy(PathNode node, GameObject activeCreature){
+        public static bool IsOccupiedByEnemy(PathNode node, Creature activeCreature){
             if (node.isOccupied && !activeCreature.CompareTag(node.GetOccupyingCreature().tag)) return true;
             return false;
         }
 
 
+        /*
         public static void ApplyFuncToCreatureSpace(GameObject creature, Action<int, int> func){
 
             CreatureSize creatureSize = creature.GetComponent<CreatureStats>().GetSize();
@@ -94,6 +95,7 @@ namespace PathingUtils {
                 Pathfinding.GetGrid().GetGridObject(a,b).ClearOccupyingCreature();
             });
         }
+        */
 
     }
 }

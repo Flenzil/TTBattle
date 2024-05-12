@@ -25,7 +25,7 @@ public class CombatManager : MonoBehaviour
             bool isHit = Physics.Raycast(ray, out RaycastHit hit);
             if (isHit){
                 if (hit.transform.GameObject().layer == LayerMask.NameToLayer("Creatures")){
-                    Attack(hit.transform.GameObject(), UGame.GetActiveAttack());
+                    Attack(hit.transform.GetComponent<Creature>(), UGame.GetActiveAttack());
                 }
             }
         }
@@ -39,8 +39,8 @@ public class CombatManager : MonoBehaviour
         }
     }
 
-    public void Attack(GameObject target, Attack attack){
-        //PathToTarget(target);
+    public void Attack(Creature target, Attack attack){
+        PathToTarget(target);
 
         FindHitAndDamageModifiers(attack, out int modifierToHit, out int modifierDamage);
         
@@ -58,7 +58,7 @@ public class CombatManager : MonoBehaviour
             target.GetComponent<Health>().Damage(damage);
             Debug.Log($"{attacker} CRITS {name} with {weapon} for {damage} damage!");
         }
-        else if (attackRoll + modifierToHit >= UGame.GetCreatureStats(target).GetAC()){
+        else if (attackRoll + modifierToHit >= target.GetAC()){
             Debug.Log($"{attacker} rolls {attackRoll} + {modifierToHit}");
             target.GetComponent<Health>().Damage(damage);
             Debug.Log($"{attacker} hits {name} with {weapon} for {damage} damage!");
@@ -71,12 +71,12 @@ public class CombatManager : MonoBehaviour
 
         if (target.GetComponent<Health>().GetCurrentHP() <= 0){
 
-            UPathing.SetCreatureSpaceToUnoccupied(target);
+            target.SetCreatureSpaceToUnoccupied();
             target.GetComponent<Shatter>().Kill(target.GetComponent<Health>().GetCurrentHP());
         }
     }
 
-    private int RollToAttack(Attack attack, GameObject target){
+    private int RollToAttack(Attack attack, Creature target){
 
         // For various reasons, attacks can have advantage (roll twice, take highest result) or 
         // disadvantage (roll twice, take lowest result) but these effects cancel eachother out.
@@ -86,7 +86,7 @@ public class CombatManager : MonoBehaviour
         bool hasDisadvantage = false;
 
         float distanceToTarget = Vector3.Distance(
-            UPathing.GetPosition(UGame.GetActiveCreature()), UPathing.GetPosition(target)
+            UGame.GetActiveCreature().GetPosition(), target.GetPosition()
             );
 
 
@@ -100,15 +100,15 @@ public class CombatManager : MonoBehaviour
         }
 
         if (
-            UGame.GetActiveCreatureStats().hasDisadvantageToHit
-            || target.GetComponent<CreatureStats>().hasDisadvantageToBeHit
+            UGame.GetActiveCreature().hasDisadvantageToHit
+            || target.hasDisadvantageToBeHit
         ){
             hasDisadvantage = true;
         }
 
         if ( 
-            UGame.GetActiveCreatureStats().hasAdvantageToHit
-            || target.GetComponent<CreatureStats>().hasAdvantageToBeHit
+            UGame.GetActiveCreature().hasAdvantageToHit
+            || target.hasAdvantageToBeHit
         ){
             hasAdvantage = true;
         }
@@ -140,7 +140,7 @@ public class CombatManager : MonoBehaviour
             modifierDamage = attack.GetBonusToDamage();
         } else{
             modifierDamage = AbilityModifier(
-                UGame.GetActiveCreatureStats()
+                UGame.GetActiveCreature()
                 .GetAbilityScores()[attackAbility]
                 ) + attack.GetBonusToDamage();
         }
@@ -149,12 +149,12 @@ public class CombatManager : MonoBehaviour
             modifierToHit = attack.GetBonusToHit();
         } else {
             modifierToHit = AbilityModifier(
-                UGame.GetActiveCreatureStats()
+                UGame.GetActiveCreature()
                 .GetAbilityScores()[attackAbility]
                 ) + attack.GetBonusToHit();
 
             if (IsProfientWithWeapon()){
-                modifierToHit += UGame.GetActiveCreatureStats().GetProficiencyBonus();
+                modifierToHit += UGame.GetActiveCreature().GetProficiencyBonus();
             }
         }   
 
@@ -165,8 +165,8 @@ public class CombatManager : MonoBehaviour
 
         foreach (AbilityScore abilityScore in abilityScores){
             if (
-                UGame.GetActiveCreatureStats().GetAbilityScores()[abilityScore] 
-                > UGame.GetActiveCreatureStats().GetAbilityScores()[bestAttackAbility]
+                UGame.GetActiveCreature().GetAbilityScores()[abilityScore] 
+                > UGame.GetActiveCreature().GetAbilityScores()[bestAttackAbility]
             ){
                 bestAttackAbility = abilityScore;
             }
@@ -182,10 +182,10 @@ public class CombatManager : MonoBehaviour
     }
 
     private bool IsProfientWithWeapon(){
-        return UGame.GetActiveCreatureStats().GetWeaponProficiencies().Contains(UGame.GetActiveAttack().GetWeaponType());
+        return UGame.GetActiveCreature().GetWeaponProficiencies().Contains(UGame.GetActiveAttack().GetWeaponType());
     }
 
-    private void PathToTarget(GameObject target){
-        PathFindingManager.Instance.SetTargetPosition(target.transform.GetChild(0).transform.position, true);
+    private void PathToTarget(Creature target){
+        PathFindingManager.Instance.SetTargetPosition(target.GetPosition(), true);
     }
 }

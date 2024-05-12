@@ -7,7 +7,7 @@ using CreatureUtils;
 using System;
 
 [CreateAssetMenu]
-public class Creature : ScriptableObject {
+public class SOCreature : ScriptableObject {
 
     [Header("Level")]
     public int level;

@@ -56,7 +56,7 @@ public class PathFindingManager : MonoBehaviour {
                 return;
             }
 
-            if (UGame.GetActiveCreatureStats().GetRemainingMovement() == 0){
+            if (UGame.GetActiveCreature().GetRemainingMovement() == 0){
                 Debug.Log("Out of movement!");
                 return;
             }
@@ -66,7 +66,7 @@ public class PathFindingManager : MonoBehaviour {
             GameObject hitObject = hit.transform.GameObject();
 
             // If the object is the active player, pathfind to ground behind it, as if the object wasn't there.
-            if (hitObject.layer == LayerMask.NameToLayer("Creatures") && IsActiveCreature(hitObject)){
+            if (hitObject.layer == LayerMask.NameToLayer("Creatures") && IsActiveCreature(hitObject.transform.GetComponent<Creature>())){
                 SetTargetPosition(UGame.GetMousePosition3D(Camera.main, "Ground"), false);
             }
 
@@ -77,7 +77,7 @@ public class PathFindingManager : MonoBehaviour {
         }
 
         if (Input.GetMouseButtonDown(4)){
-            UGame.GetActiveCreatureStats().SetReaminingMovement(UGame.GetActiveCreatureStats().GetMovementSpeed());
+            UGame.GetActiveCreature().SetReaminingMovement(UGame.GetActiveCreature().GetMovementSpeed());
         }
 
         if (Input.GetMouseButtonDown(3)){
@@ -97,14 +97,14 @@ public class PathFindingManager : MonoBehaviour {
 
         currentPathIndex = 0;
 
-        SetPath(GetPosition(), targetPosition, isAttacking);
+        SetPath(UGame.GetActiveCreature().GetPosition(), targetPosition, isAttacking);
 
         if (path != null && path.Count > 1) {
 
             path.RemoveAt(0);
 
             if (path != null) {
-                ClearCreatureSpace(UGame.GetActiveCreature());
+                UGame.GetActiveCreature().SetCreatureSpaceToUnoccupied();
                 //SetSpaceToOccupied(path.Last(), UGame.GetActiveCreature());
                 pathFindingVisual.SetPath(path);
                 pathFindingVisual.TileHighlighting();
@@ -121,8 +121,8 @@ public class PathFindingManager : MonoBehaviour {
 
         if (pathVectorList != null) {
             Vector3 targetPosition = pathVectorList[currentPathIndex];
-            if (Vector3.Distance(GetPosition(), targetPosition) > 0.05f) {
-                Vector3 moveDirection = (targetPosition - GetPosition()).normalized;
+            if (Vector3.Distance(UGame.GetActiveCreature().GetPosition(), targetPosition) > 0.05f) {
+                Vector3 moveDirection = (targetPosition - UGame.GetActiveCreature().GetPosition()).normalized;
 
                 UGame.GetActiveCreature().transform.position 
                     += moveSpeed * Time.deltaTime * moveDirection;
@@ -130,16 +130,16 @@ public class PathFindingManager : MonoBehaviour {
             } else {
                 
                 GetGrid().GetXY(pathVectorList[currentPathIndex], out int x, out int y);
-                UGame.GetActiveCreatureStats().DecreaseRemainingMovement(5);
+                UGame.GetActiveCreature().DecreaseRemainingMovement(5);
                 if (IsDifficultTerrain(x, y)){
-                    UGame.GetActiveCreatureStats().DecreaseRemainingMovement(5);
+                    UGame.GetActiveCreature().DecreaseRemainingMovement(5);
                 }
 
                 currentPathIndex++;
                 
                 if (
                     currentPathIndex >= pathVectorList.Count
-                    || UGame.GetActiveCreatureStats().GetRemainingMovement() == 0
+                    || UGame.GetActiveCreature().GetRemainingMovement() == 0
                     ) {
                     StopMoving();
                 }
@@ -158,11 +158,7 @@ public class PathFindingManager : MonoBehaviour {
             out int y
         );
         
-        UPathing.SetCreatureSpaceToOccupied(
-            UGame.GetActiveCreature(),
-            x,
-            y
-        );
+        UGame.GetActiveCreature().SetCreatureSpaceToOccupied(x, y);
 
         currentPathIndex = 0;
 
@@ -208,13 +204,13 @@ public class PathFindingManager : MonoBehaviour {
         }
 
         Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit);
-        GetGrid().GetXY(GetPosition(UGame.GetActiveCreature()), out int currentX, out int currentY);
+        GetGrid().GetXY(UGame.GetActiveCreature().GetPosition(), out int currentX, out int currentY);
 
         int endX, endY;
 
         // Allow player to click through the active creature so that they can pathfind to a space
         // behind it.
-        if (IsActiveCreature(hit.transform.GameObject())) {
+        if (IsActiveCreature(hit.transform.GetComponent<Creature>())) {
             GetGrid().GetXY(UGame.GetMousePosition3D(Camera.main, "Ground"), out endX, out endY);
         } else {
             GetGrid().GetXY(hit.point, out endX, out endY);
@@ -229,10 +225,10 @@ public class PathFindingManager : MonoBehaviour {
         bool isAttacking = false;
         if (
             hit.transform.GameObject().layer == LayerMask.NameToLayer("Creatures") 
-            && !IsActiveCreature(hit.transform.GameObject())
+            && !IsActiveCreature(hit.transform.GetComponent<Creature>())
         ) {
             isAttacking = true;
-            GetGrid().GetXY(GetPosition(hit.transform.GameObject()), out endX, out endY);
+            GetGrid().GetXY(hit.transform.GetComponent<Creature>().GetPosition(), out endX, out endY);
         }
 
         // Find path to endX, endY
@@ -241,20 +237,6 @@ public class PathFindingManager : MonoBehaviour {
         // Update highlighted tiles
         pathFindingVisual.SetPath(path);
         pathFindingVisual.TileHighlighting();
-    }
-
-
-    private Vector3 GetPosition(GameObject player){
-
-        // Pathfinding for creatures is based on an anchor game object which is a child
-        // of the creature object, so return the position of that instead of the position
-        // of the creature
-
-        if (player.transform.childCount == 0) {
-            return player.transform.position;
-        } else {
-            return player.transform.GetChild(0).transform.position;
-        }
     }
 
     private bool IsMouseOverNewGridNode(){
@@ -293,34 +275,10 @@ public class PathFindingManager : MonoBehaviour {
             && y >= 0
         );
     }
-    private bool IsActiveCreature(GameObject creature){
+    private bool IsActiveCreature(Creature creature){
         return creature == UGame.GetActiveCreature();
     }
     
-
-    private void SetSpaceToOccupied(PathNode positionNode, GameObject creature){
-        
-        // Set every pathNode in creature's space to occupied
-
-        Grid<PathNode> grid = GetGrid();
-        UPathing.SetCreatureSpaceToOccupied(creature, positionNode.x, positionNode.y);
-    }
-
-    private void ClearCreatureSpace(GameObject creature){
-
-        // Set every pathNode in creature's space to unoccupied
-
-        Grid<PathNode> grid = GetGrid();
-        GameObject anchor = creature.transform.GetChild(0).GameObject();
-        grid.GetXY(anchor.transform.position, out int x, out int y);
-
-        UPathing.SetCreatureSpaceToUnoccupied(creature, x, y);
-    }
-
-
-    public Vector3 GetPosition() {
-        return UGame.GetActiveCreature().transform.GetChild(0).transform.position;
-    }
 
     private List<Vector3> PathNodeListToVector3List(List<PathNode> pathNodeList){
 

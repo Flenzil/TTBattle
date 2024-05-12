@@ -92,7 +92,7 @@ public class PathFindingVisual{
 
         // Highlights all PathNodes in path and highlights surrounding tiles for creatures that are larger
         // than 1 tile wide.
-        int remainingMovement = UGame.GetActiveCreatureStats().GetRemainingMovement() / 5;
+        int remainingMovement = UGame.GetActiveCreature().GetRemainingMovement() / 5;
         bool passedThroughDifficultTerrain;
 
         for (int i = 1; i < path.Count(); i++){

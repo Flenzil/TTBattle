@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour {
     public bool visualiseGrid = true;
 
     private static GameManager instance;
-    public GameObject activePlayer {get; set;}
+    public Creature activeCreature {get; set;}
     List<GameObject> initiativeOrder;
 
     enum states{
@@ -47,11 +47,11 @@ public class GameManager : MonoBehaviour {
 
     private void Update() {
         if (Input.GetKey(KeyCode.B)) {
-            UGame.GetActiveCreatureStats().SetCondition(Condition.blinded);
+            UGame.GetActiveCreature().SetCondition(Condition.blinded);
         }
 
         if (Input.GetKey(KeyCode.I)) {
-            UGame.GetActiveCreatureStats().SetCondition(Condition.invisible);
+            UGame.GetActiveCreature().SetCondition(Condition.invisible);
         }
     }
 
@@ -102,7 +102,7 @@ public class GameManager : MonoBehaviour {
             
             // Set creatures space to occupied
             Pathfinding.GetGrid().GetXY(GetPosition(creatureObject), out int x, out int y);
-            UPathing.SetCreatureSpaceToOccupied(creatureObject, x, y);
+            creatureObject.GetComponent<Creature>().SetCreatureSpaceToOccupied(x, y);
         }
     }
 }

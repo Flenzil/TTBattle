@@ -8,7 +8,7 @@ public class Health : MonoBehaviour
     private int currentHP;
 
     void Start(){
-        currentHP = GetComponent<CreatureStats>().GetMaxHP();
+        currentHP = GetComponent<Creature>().GetMaxHP();
     }
 
     public int GetCurrentHP(){

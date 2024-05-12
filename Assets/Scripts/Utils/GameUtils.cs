@@ -21,12 +21,8 @@ namespace GameUtils {
             };
         }
 
-        public static GameObject GetActiveCreature(){
-            return GameManager.Instance.activePlayer;
-        }
-
-        public static CreatureStats GetActiveCreatureStats(){
-            return GetActiveCreature().GetComponent<CreatureStats>();
+        public static Creature GetActiveCreature(){
+            return GameManager.Instance.activeCreature;
         }
 
         public static Actions GetActiveCreatureActions(){
@@ -49,17 +45,13 @@ namespace GameUtils {
             }
         }
 
-        public static CreatureStats GetCreatureStats(GameObject creature){
-            return creature.GetComponent<CreatureStats>();
-        }
-
-        public static void SetActiveCreature(GameObject creature){
-            GameManager.Instance.activePlayer = null;
-            GameManager.Instance.activePlayer = creature;
+        public static void SetActiveCreature(Creature creature){
+            GameManager.Instance.activeCreature = null;
+            GameManager.Instance.activeCreature = creature;
         }
         
         public static CreatureSize GetActiveCreatureSize(){
-            return GetActiveCreature().GetComponent<CreatureStats>().GetSize();
+            return GetActiveCreature().GetSize();
         }
     }
 }

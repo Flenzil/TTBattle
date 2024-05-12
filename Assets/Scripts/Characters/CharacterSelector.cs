@@ -10,7 +10,7 @@ public class CharacterSelector : MonoBehaviour
 {
     public event EventHandler<OnActivePlayerChangedEventArgs> OnActivePlayerChanged;
     public class OnActivePlayerChangedEventArgs : EventArgs{
-        public GameObject activePlayer;
+        public Creature activeCreature;
     }
     Color startingColour;
 
@@ -40,17 +40,17 @@ public class CharacterSelector : MonoBehaviour
                     //hit.transform.GameObject().GetComponent<CharacterPathfindingMovementHandler>().enabled = true;
                     hit.transform.GameObject().GetComponent<Outline>().enabled = true;
 
-                    UGame.SetActiveCreature( hit.transform.GameObject());
-                    TriggerActivePlayerChanged(hit.transform.GameObject());
+                    UGame.SetActiveCreature( hit.transform.GetComponent<Creature>());
+                    TriggerActivePlayerChanged(hit.transform.GetComponent<Creature>());
                     
                 }
             }
         }
     }
 
-    public void TriggerActivePlayerChanged(GameObject activePlayer){
+    public void TriggerActivePlayerChanged(Creature activeCreature){
         if (OnActivePlayerChanged != null){
-            OnActivePlayerChanged(this, new OnActivePlayerChangedEventArgs{ activePlayer = activePlayer});
+            OnActivePlayerChanged(this, new OnActivePlayerChangedEventArgs{ activeCreature = activeCreature});
 
         }
     }

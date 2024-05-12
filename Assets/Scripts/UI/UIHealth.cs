@@ -11,7 +11,7 @@ public class UIHealth : MonoBehaviour
 
     private UIDocument uIDocument;
     private int currentHP = -1;
-    private GameObject activeCreature = null;
+    private Creature activeCreature = null;
 
     private void OnEnable(){
         uIDocument = GetComponent<UIDocument>();
@@ -24,7 +24,7 @@ public class UIHealth : MonoBehaviour
                 currentHP = UGame.GetActiveCreatureHealth().GetCurrentHP();
                 activeCreature = UGame.GetActiveCreature();
 
-                int maxHP = UGame.GetActiveCreatureStats().GetMaxHP();
+                int maxHP = UGame.GetActiveCreature().GetMaxHP();
 
                 VisualElement root = uIDocument.rootVisualElement;
 

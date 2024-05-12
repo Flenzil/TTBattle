@@ -110,7 +110,7 @@ public class Pathfinding {
 
                 List<PathNode> surroundingNodes = GetGridObjectsSurroundingCreature(
                     endNode.GetOccupyingCreature(), 
-                    UCreature.CreatureWidthAsInt(UGame.GetActiveCreature().GetComponent<CreatureStats>().GetSize()),
+                    UCreature.CreatureWidthAsInt(UGame.GetActiveCreature().GetSize()),
                     attackRange
                 );
                 
@@ -221,6 +221,9 @@ public class Pathfinding {
         
         for (int i = seekRadiusStart; i <= seekRadiusEnd; i++){
             for (int j = seekRadiusStart; j <= seekRadiusEnd; j++){
+                if (GetNode(node.x + i, node.y + j) == null){
+                    continue;
+                }
                 if (GetNode(node.x + i, node.y + j).GetOccupyingCreature() == UGame.GetActiveCreature()){
                     continue;
                 }
@@ -271,12 +274,13 @@ public class Pathfinding {
 
     }
     
-    private bool IsCreatureSpaceInAdjacentCreatureSpace(GameObject creature, PathNode currentNode, List<PathNode> adjacentCreatures){
+    private bool IsCreatureSpaceInAdjacentCreatureSpace(Creature creature, PathNode currentNode, List<PathNode> adjacentCreatures){
 
         // Checks if any part of the active creature is occupying the same space as one
         // of the creatures adjacent to the target, if attacking.
 
-        CreatureSize creatureSize = creature.GetComponent<CreatureStats>().GetSize();
+        /*
+        CreatureSize creatureSize = creature.GetSize();
         UPathing.GetSeekRadius(creatureSize, out int seekRadiusStart, out int seekRadiusEnd);
         PathNode centre = currentNode;
 
@@ -292,10 +296,17 @@ public class Pathfinding {
                 }
             }
         }
+        */
+        foreach (PathNode node in creature.GetOccupiedNodes(currentNode)){
+            if (adjacentCreatures.Contains(node)){
+                return true;
+            }
+
+        }
         return false;
     }
 
-    private List<PathNode> GetGridObjectsSurroundingCreature(GameObject creature, int searchWidth, int weaponRange){
+    private List<PathNode> GetGridObjectsSurroundingCreature(Creature creature, int searchWidth, int weaponRange){
 
         // Returns the nodes surround the creature in a radius determined by the active creature's size and the
         // active creature's attack range. This is used to remove occupied spaces from considering in the pathfinding.
@@ -304,13 +315,13 @@ public class Pathfinding {
 
         // SeekRadius is determined by the creature's size so that the creature's entire space is explored.
         UPathing.GetSeekRadius(
-            creature.GetComponent<CreatureStats>().GetSize(),
+            creature.GetSize(),
             out int seekRadiusStart,
             out int seekRadiusEnd
         );
 
         // The centre of a creature is determined by an anchor GameObject which is parented to the creature.
-        PathNode centre = grid.GetGridObject(creature.transform.GetChild(0).transform.position);
+        PathNode centre = grid.GetGridObject(creature.GetPosition());
 
         seekRadiusStart = seekRadiusStart - weaponRange / 5 - searchWidth;
         seekRadiusEnd = seekRadiusEnd + weaponRange / 5 + searchWidth;
@@ -349,11 +360,10 @@ public class Pathfinding {
         // the edge of the map, since the centre of the creature can't make it there. If the active
         // creature is attacking, this also takes into account the attack range of the active creature.
 
-        UPathing.GetSeekRadius(
-            UGame.GetActiveCreatureSize(),
+        UGame.GetActiveCreature().GetSeekRadius(
             out int attackerSeekRadiusStart, 
             out int attackerSeekRadiusEnd
-            );
+        );
 
         int weaponRange = 0;
         int targetSeekRadiusStart = 0;
@@ -361,11 +371,10 @@ public class Pathfinding {
 
         // Only give non-zero value to the above variables if the active creature is attacking
         if (isAttacking){
-            UPathing.GetSeekRadius(
-                endNode.GetOccupyingCreature().GetComponent<CreatureStats>().GetSize(),
+            endNode.GetOccupyingCreature().GetSeekRadius(
                 out targetSeekRadiusStart, 
                 out targetSeekRadiusEnd
-                );
+            );
 
             weaponRange = UGame.GetActiveAttack().GetWeaponRange() / 5;
         }
@@ -384,7 +393,7 @@ public class Pathfinding {
         return false;
     }
 
-    public static bool IsOccupiedByPassableCreature(PathNode node, GameObject activeCreature){
+    public static bool IsOccupiedByPassableCreature(PathNode node, Creature activeCreature){
 
         // Creatures can pass through allies
         // Creatures cannot pass through enemies
@@ -401,7 +410,7 @@ public class Pathfinding {
 
         if (Math.Abs(UCreature.CreatureSizesDifference(
             node.GetOccupyingCreatureSize(),
-            activeCreature.GetComponent<CreatureStats>().GetSize()
+            activeCreature.GetSize()
             )) >= 2
         ) {
             return true;
@@ -415,29 +424,23 @@ public class Pathfinding {
         // Checks if creatures that take up more than one square can fit in the destination location
         // either because of unwalkable tiles or tiles occupied by enemies.
 
-        UPathing.GetSeekRadius(UGame.GetActiveCreatureSize(), out int seekRadiusStart, out int seekRadiusEnd);
-
-        for (int i = seekRadiusStart; i <= seekRadiusEnd; i++){
-            for (int j = seekRadiusStart; j <= seekRadiusEnd; j++){
-                PathNode surroundingNode = GetNode(destinationNode.x + i, destinationNode.y + j);
-                if (!IsInsideGrid(destinationNode.x + i, destinationNode.y + j)){
+        foreach (PathNode node in UGame.GetActiveCreature().GetOccupiedNodes(destinationNode)){
+            if (!IsInsideGrid(node.x, node.y)){
+                return false;
+            }
+            if (!node.isWalkable){
+                return false;
+            }
+            if (endNode.isOccupied && node.isOccupied){
+                if (
+                    !IsOccupiedByPassableCreature(node, UGame.GetActiveCreature()) 
+                    && endNode.GetOccupyingCreature() != node.GetOccupyingCreature()
+                ){
                     return false;
                 }
-                if (!surroundingNode.isWalkable){
+            } else {
+                if (!IsOccupiedByPassableCreature(node, UGame.GetActiveCreature())) {
                     return false;
-                }
-                if (endNode.isOccupied && surroundingNode.isOccupied){
-                    if (
-                        !IsOccupiedByPassableCreature(surroundingNode, UGame.GetActiveCreature()) 
-                        && endNode.GetOccupyingCreature() != surroundingNode.GetOccupyingCreature()
-                    ){
-                        return false;
-                    }
-                } else {
-                    if (!IsOccupiedByPassableCreature(surroundingNode, UGame.GetActiveCreature())) {
-                        return false;
-                    }
-
                 }
 
             }
@@ -566,14 +569,14 @@ public class Pathfinding {
 
         while (
             path != null
-            && IsAnyPartOfCreatureSpaceOccupied(UGame.GetActiveCreature(), path.Last().x, path.Last().y) 
+            && IsAnyPartOfCreatureSpaceOccupied(UGame.GetActiveCreature(), path.Last()) 
         ){
             path = CutOccupiedSpaceFromPath(path);
         }
 
         // If the creature CAN pass through the blocking creature but doesn't have enough movement to do
         // so, end the path.
-        int remainingMovement = UGame.GetActiveCreatureStats().GetRemainingMovement() / 5;
+        int remainingMovement = UGame.GetActiveCreature().GetRemainingMovement() / 5;
         if (path.Count() > remainingMovement + 1){
             if (path[remainingMovement + 1].isOccupied){
                 for (int i = 0; i < path.Count() - remainingMovement; i++){
@@ -592,20 +595,17 @@ public class Pathfinding {
         return path;
     }
 
-    private bool IsAnyPartOfCreatureSpaceOccupied(GameObject creature, int x, int y){
+    private bool IsAnyPartOfCreatureSpaceOccupied(Creature creature, PathNode currentNode){
 
         // Checks if any part of the creature's space is occupied by another creature
 
-        UPathing.GetSeekRadius(creature.GetComponent<CreatureStats>().GetSize(), out int seekRadiusStart, out int seekRadiusEnd);
-        for (int i = seekRadiusStart; i <= seekRadiusEnd; i++){
-            for (int j = seekRadiusStart; j <= seekRadiusEnd; j++){
-                if (!IsInsideGrid(x + i, y + j)){
-                    continue;
-                }
-                if (GetNode(x + i, y + j).isOccupied ){
-                    if(GetNode(x + i, y + j).GetOccupyingCreature() != creature){
-                        return true;
-                    }
+        foreach (PathNode node in creature.GetOccupiedNodes(currentNode)){
+            if (!IsInsideGrid(currentNode.x, currentNode.y)){
+                continue;
+            }
+            if (node.isOccupied){
+                if (node.GetOccupyingCreature() != creature){
+                    return true;
                 }
             }
         }
