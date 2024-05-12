@@ -53,6 +53,13 @@ public class GameManager : MonoBehaviour {
         if (Input.GetKey(KeyCode.I)) {
             UGame.GetActiveCreature().SetCondition(Condition.invisible);
         }
+
+        if (Input.GetKeyDown(KeyCode.Space)) {
+            foreach (Vector3 v in UGame.GetActiveCreature().GetCorners()) {
+                Debug.Log(v);
+            }
+        }
+
     }
 
 
@@ -91,7 +98,6 @@ public class GameManager : MonoBehaviour {
 
             Vector3 placementPosition = Pathfinding.GetGrid().GetWorldPosition(creatureLocX, creatureLocY) + UPathing.XZPlane(1, 1) * 0.5f;
 
-            Debug.Log(creatures[i]);
             GameObject creatureObject = Instantiate(creatures[i], placementPosition, Quaternion.identity);
             creatureObject.transform.Translate(distanceToAnchor);
             

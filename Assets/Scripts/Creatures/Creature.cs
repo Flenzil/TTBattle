@@ -8,6 +8,8 @@ using System.Linq;
 using UnityEngine.Rendering;
 using System.Diagnostics.CodeAnalysis;
 using UnityEditorInternal;
+using PathingUtils;
+using Unity.Burst.Intrinsics;
 
 public class Creature : MonoBehaviour
 {
@@ -36,6 +38,26 @@ public class Creature : MonoBehaviour
     public Vector3 GetPosition(){
         // The centre of a creature is determined by an anchor GameObject which is parented to the creature.
         return transform.GetChild(0).position;
+    }
+
+    public List<Vector3> GetCorners(){
+        // Returns the position of the four corners of a creature's occupied space
+        List<Vector3> allCorners = new();
+        foreach (PathNode node in occupiedNodes){
+            allCorners.Add(new Vector3(node.x, 0, node.y));
+            allCorners.Add(new Vector3(node.x + 1f, 0, node.y));
+            allCorners.Add(new Vector3(node.x, 0, node.y + 1f));
+            allCorners.Add(new Vector3(node.x + 1f, 0, node.y + 1f));
+        }
+
+        List<Vector3> fourCorners = new() {
+            new Vector3(allCorners.Max(v => v.x), 0, allCorners.Max(v => v.z)),
+            new Vector3(allCorners.Max(v => v.x), 0, allCorners.Min(v => v.z)),
+            new Vector3(allCorners.Min(v => v.x), 0, allCorners.Max(v => v.z)),
+            new Vector3(allCorners.Min(v => v.x), 0, allCorners.Min(v => v.z))
+        };
+
+        return fourCorners;
     }
 
     public void GetSeekRadius(out int seekRadiusStart, out int seekRadiusEnd){
@@ -108,6 +130,7 @@ public class Creature : MonoBehaviour
     }
 
     public void SetCreatureSpaceToOccupied(){
+        occupiedNodes.Clear();
         ApplyFuncToCreatureSpace((a, b) => {
             Pathfinding.GetGrid().GetGridObject(a,b).SetOccupyingCreature(this);
             occupiedNodes.Add(Pathfinding.GetGrid().GetGridObject(a,b));
@@ -115,8 +138,10 @@ public class Creature : MonoBehaviour
     }
 
     public void SetCreatureSpaceToOccupied(int x, int y){
+        occupiedNodes.Clear();
         ApplyFuncToCreatureSpace(x, y, (a, b) => {
             Pathfinding.GetGrid().GetGridObject(a,b).SetOccupyingCreature(this);
+            occupiedNodes.Add(Pathfinding.GetGrid().GetGridObject(a,b));
         });
     }
 
