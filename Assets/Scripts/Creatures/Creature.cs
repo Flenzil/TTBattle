@@ -20,6 +20,9 @@ public class Creature : MonoBehaviour
     public bool hasAdvantageToBeHit = false;
     public bool hasDisadvantageToBeHit = false;
     public List<Condition> currentConditions = new();
+    public List<Creature> seenBy;
+    public List<Creature> canSee;
+
 
     private List<PathNode> occupiedNodes = new();
 
@@ -42,6 +45,12 @@ public class Creature : MonoBehaviour
 
     public List<Vector3> GetCorners(){
         // Returns the position of the four corners of a creature's occupied space
+
+        // If a creature is next to a wall, a raycast originating from its corner,
+        // may start from within the wall and thus won't collide with it, so the
+        // positions of the corner are moved slightly inside the creature's space
+        float tinyOffset = 0.01f; 
+
         List<Vector3> allCorners = new();
         foreach (PathNode node in occupiedNodes){
             allCorners.Add(new Vector3(node.x, 0, node.y));
@@ -51,10 +60,10 @@ public class Creature : MonoBehaviour
         }
 
         List<Vector3> fourCorners = new() {
-            new Vector3(allCorners.Max(v => v.x), 0, allCorners.Max(v => v.z)),
-            new Vector3(allCorners.Max(v => v.x), 0, allCorners.Min(v => v.z)),
-            new Vector3(allCorners.Min(v => v.x), 0, allCorners.Max(v => v.z)),
-            new Vector3(allCorners.Min(v => v.x), 0, allCorners.Min(v => v.z))
+            new Vector3(allCorners.Max(v => v.x) - tinyOffset, 0, allCorners.Max(v => v.z) - tinyOffset),
+            new Vector3(allCorners.Max(v => v.x) - tinyOffset, 0, allCorners.Min(v => v.z) + tinyOffset),
+            new Vector3(allCorners.Min(v => v.x) + tinyOffset, 0, allCorners.Max(v => v.z) - tinyOffset),
+            new Vector3(allCorners.Min(v => v.x) + tinyOffset, 0, allCorners.Min(v => v.z) + tinyOffset)
         };
 
         return fourCorners;
@@ -241,4 +250,5 @@ public class Creature : MonoBehaviour
             Conditions.ApplyCondition(currentCondition, this);
         }
     }   
+
 }

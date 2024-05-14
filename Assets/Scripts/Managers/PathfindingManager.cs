@@ -159,6 +159,8 @@ public class PathFindingManager : MonoBehaviour {
         );
         
         UGame.GetActiveCreature().SetCreatureSpaceToOccupied(x, y);
+        UGame.GetActiveCreature().seenBy = LineOfSight.CreaturesWithLineOfSight();
+        UGame.GetActiveCreature().canSee = LineOfSight.CreaturesWithinLineOfSight();
 
         currentPathIndex = 0;
 

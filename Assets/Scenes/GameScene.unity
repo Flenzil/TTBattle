@@ -2709,8 +2709,8 @@ MonoBehaviour:
   - {fileID: 4721765961966492531, guid: ddfae51fd9387254e8c584286c599d62, type: 3}
   - {fileID: 5367393763499539497, guid: f2a26bc57c2ec4342a47c0e8f9fcaaf9, type: 3}
   - {fileID: 8798911927139765949, guid: 5aabcdbaf310df048bd8ce8d8c16bd4d, type: 3}
-  floorWidth: 15
-  floorHeight: 15
+  floorWidth: 20
+  floorHeight: 20
   cellSize: 1
   visualiseGrid: 1
 --- !u!1 &2097692374

@@ -16,7 +16,7 @@ MonoBehaviour:
   size: 4
   moveSpeed: 15
   ac: 16
-  maxHP: 1
+  maxHP: 156
   strength: 24
   dexterity: 10
   constitution: 21

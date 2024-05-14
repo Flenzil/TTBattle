@@ -55,9 +55,7 @@ public class GameManager : MonoBehaviour {
         }
 
         if (Input.GetKeyDown(KeyCode.Space)) {
-            foreach (Vector3 v in UGame.GetActiveCreature().GetCorners()) {
-                Debug.Log(v);
-            }
+            Debug.Log(UGame.GetActiveCreature().seenBy);
         }
 
     }

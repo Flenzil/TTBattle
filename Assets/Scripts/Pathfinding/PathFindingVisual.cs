@@ -242,7 +242,7 @@ public class PathFindingVisual{
                     grid.GetCellSize() * (UPathing.XZPlane(x,y) + UPathing.XZPlane(1,1) * 0.5f),
                     Quaternion.identity);
 
-                    floor[y + grid.GetHeight() * x].layer = LayerMask.NameToLayer("Ground");
+                    //floor[y + grid.GetHeight() * x].layer = LayerMask.NameToLayer("Ground");
                 } else {
                     floor[y + grid.GetHeight() * x] = UnityEngine.Object.Instantiate(wallTile,
                     grid.GetCellSize() * (UPathing.XZPlane(x,y) + UPathing.XZPlane(1,1) * 0.5f),

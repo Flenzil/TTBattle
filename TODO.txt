@@ -1,0 +1,6 @@
+BY NO MEANS A COMPRHENSIVE LIST!!! Just things I want to remember for the short term
+
+- Convert List<T> to <T>[] where possible
+- Conditions
+- Delay attack until creatures has finished movement
+- General actions
