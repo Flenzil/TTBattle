@@ -45,6 +45,9 @@ public static class LineOfSight {
             if (creature == UGame.GetActiveCreature()){
                 continue;
             }
+            if (creature.currentConditions.Contains(Condition.invisible)){
+                continue;
+            }
             if (CanSeeActiveCreature(creature)){
                 Debug.Log("Can see" + creature);
                 creaturesWithinLineOfSight.Add(creature);
@@ -67,8 +70,8 @@ public static class LineOfSight {
             return false;
         }
 
-        List<Vector3> activeCreatureCorners = UGame.GetActiveCreature().GetCorners();
-        List<Vector3> creatureCorners = creature.GetCorners();
+        Vector3[] activeCreatureCorners = UGame.GetActiveCreature().GetCorners();
+        Vector3[] creatureCorners = creature.GetCorners();
         
         foreach (Vector3 activeCorner in activeCreatureCorners) {
             foreach (Vector3 corner in creatureCorners){

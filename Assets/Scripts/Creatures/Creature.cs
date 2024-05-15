@@ -29,7 +29,6 @@ public class Creature : MonoBehaviour
     private int remainingMovement;
     public int GetMaxHP(){ return stats.maxHP;}
     public int GetAC(){ return stats.ac;}
-    public int GetMovementSpeed(){ return stats.moveSpeed;}
     public CreatureSize GetSize(){ return stats.size;}
     public int GetLevel(){ return stats.level;}
 
@@ -38,15 +37,22 @@ public class Creature : MonoBehaviour
     }
     
 
+    public int GetMovementSpeed(){ 
+        if (currentConditions.Contains(Condition.immobilised)){
+            return 0;
+        }
+        return stats.moveSpeed;
+    }
+
     public Vector3 GetPosition(){
         // The centre of a creature is determined by an anchor GameObject which is parented to the creature.
         return transform.GetChild(0).position;
     }
 
-    public List<Vector3> GetCorners(){
+    public Vector3[] GetCorners(){
         // Returns the position of the four corners of a creature's occupied space
 
-        // If a creature is next to a wall, a raycast originating from its corner,
+        // If a creature is next to a wall, a raycast originating from its corner
         // may start from within the wall and thus won't collide with it, so the
         // positions of the corner are moved slightly inside the creature's space
         float tinyOffset = 0.01f; 
@@ -59,7 +65,7 @@ public class Creature : MonoBehaviour
             allCorners.Add(new Vector3(node.x + 1f, 0, node.y + 1f));
         }
 
-        List<Vector3> fourCorners = new() {
+        Vector3[] fourCorners = {
             new Vector3(allCorners.Max(v => v.x) - tinyOffset, 0, allCorners.Max(v => v.z) - tinyOffset),
             new Vector3(allCorners.Max(v => v.x) - tinyOffset, 0, allCorners.Min(v => v.z) + tinyOffset),
             new Vector3(allCorners.Min(v => v.x) + tinyOffset, 0, allCorners.Max(v => v.z) - tinyOffset),
@@ -233,7 +239,6 @@ public class Creature : MonoBehaviour
 
     public void SetCondition(Condition condition){
         Conditions.ApplyCondition(condition, this);
-        currentConditions.Add(condition);
     }
 
     public void ClearCondition(Condition condition){
@@ -245,7 +250,6 @@ public class Creature : MonoBehaviour
         // a creature will have even 2 conditions at the same time so its probably not that bad. 
         
         Conditions.ClearCondition(condition, this);
-        currentConditions.Remove(condition);
         foreach (Condition currentCondition in currentConditions){
             Conditions.ApplyCondition(currentCondition, this);
         }
